@@ -1,6 +1,6 @@
 // Guarda la app y sus librerías para que abra aunque no haya señal en el club.
 // Los datos los maneja Firestore (tiene su propia cola offline).
-const CACHE = "puerta-v4";
+const CACHE = "puerta-v5";
 const SHELL = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "logo.png"];
 const CDN = /^https:\/\/(www\.gstatic\.com\/firebasejs|cdnjs\.cloudflare\.com)\//;
 
@@ -20,7 +20,7 @@ self.addEventListener("fetch", e => {
   if (!same && !CDN.test(req.url)) return; // Firestore/Auth van directo a la red
 
   if (req.mode === "navigate") { // la página: primero red (para recibir cambios), si no hay, la guardada
-    e.respondWith(fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put("index.html", c)); return r; })
+    e.respondWith(fetch(req.url, {cache: "no-cache"}).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put("index.html", c)); return r; })
       .catch(() => caches.match("index.html")));
     return;
   }
