@@ -429,7 +429,7 @@ function renderPin(app){
       LS.set("pm_pin_ok_" + S.ev, true); if (v === CONFIG.pinAdmin) S.admin = true; render();
     } else { buzz([80,60,80]); toast("PIN incorrecto"); $("#pin").value = ""; }
   };
-  $("#ok").onclick = go; $("#pin").onkeydown = e => e.key === "Enter" && go(); $("#pin").focus();
+  $("#ok").onclick = go; $("#pin").onkeydown = e => { if (e.key === "Enter") go(); }; $("#pin").focus();
 }
 
 function renderDevice(app){
@@ -443,7 +443,7 @@ function renderDevice(app){
     const v = $("#dev").value.trim(); if (!v) return; S.device = v; LS.set("pm_device", v); render();
     if (S.admin && !S.people.size) setTimeout(openAdmin, 150);
   };
-  $("#ok").onclick = go; $("#dev").onkeydown = e => e.key === "Enter" && go(); $("#dev").focus();
+  $("#ok").onclick = go; $("#dev").onkeydown = e => { if (e.key === "Enter") go(); }; $("#dev").focus();
 }
 
 function filtered(){
@@ -592,7 +592,7 @@ function askPin(title, expected, ok){
     <input class="field pin" id="p" inputmode="numeric" type="password" autocomplete="off" maxlength="8" style="margin-top:12px">
     <button class="btn or" id="ok">Continuar</button><button class="btn ghost" id="x">Cancelar</button>`, el => {
     const go = () => { if ($("#p", el).value.trim() === expected){ closeSheet(); ok(); } else { buzz([80,60,80]); toast("PIN incorrecto"); $("#p", el).value = ""; } };
-    $("#ok", el).onclick = go; $("#x", el).onclick = closeSheet; $("#p", el).onkeydown = e => e.key === "Enter" && go();
+    $("#ok", el).onclick = go; $("#x", el).onclick = closeSheet; $("#p", el).onkeydown = e => { if (e.key === "Enter") go(); };
     setTimeout(() => $("#p", el).focus(), 50);
   });
 }

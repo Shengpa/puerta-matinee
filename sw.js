@@ -1,6 +1,6 @@
 // Guarda la app y sus librerías para que abra aunque no haya señal en el club.
 // Los datos los maneja Firestore (tiene su propia cola offline).
-const CACHE = "puerta-v3";
+const CACHE = "puerta-v4";
 const SHELL = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "logo.png"];
 const CDN = /^https:\/\/(www\.gstatic\.com\/firebasejs|cdnjs\.cloudflare\.com)\//;
 
