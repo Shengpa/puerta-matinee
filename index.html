@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Puerta Matinée</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003087">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Puerta">
+<style>
+:root{
+  /* colores del Liceo: azul de Tiburones y el Kiosko + celeste del escudo */
+  --azul:#003087; --azul2:#0047CC; --azulclaro:#e8f0ff;
+  --celeste:#33A3DC; --celeste2:#6cc4f0;
+  --bg:#f4f7ff; --card:#fff; --line:#c5d4ed;
+  --txt:#0a1628; --txt2:#334155; --mut:#64748b;
+  --verde:#16a34a; --verdeclaro:#e7f7ed; --rojo:#dc2626;
+  --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100dvh;padding-bottom:env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+input,select{font:inherit}
+.hidden{display:none!important}
+
+/* encabezado azul */
+header{position:sticky;top:0;z-index:5;background:var(--azul);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 12px;border-radius:0 0 20px 20px;box-shadow:0 6px 18px rgba(0,48,135,.25)}
+.hrow{display:flex;align-items:center;gap:10px}
+.title{flex:1;min-width:0}
+.title b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.title small{color:#c9d7f5;font-size:12px}
+.dot{display:inline-block;vertical-align:0;width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;flex:none}
+.dot.off{background:#ff6b6b;box-shadow:0 0 8px #ff6b6b}
+.dot.sync{background:var(--celeste2);box-shadow:0 0 8px var(--celeste2)}
+.iconbtn{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:20px;flex:none}
+
+.stats{margin-top:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:10px 14px}
+.stats .big{display:flex;align-items:baseline;gap:8px}
+.stats .big b{font-size:34px;color:var(--celeste);font-variant-numeric:tabular-nums}
+.stats .big span{color:#dbe5fb}
+.bar{height:8px;border-radius:8px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--celeste);transition:width .4s}
+.stats .sub{display:flex;justify-content:space-between;gap:8px;color:#c9d7f5;font-size:13px;margin-top:6px}
+
+.search{margin-top:10px;position:relative}
+.search input{width:100%;height:52px;border-radius:14px;border:2px solid transparent;background:#fff;color:var(--txt);padding:0 44px 0 16px;font-size:18px;outline:none}
+.search input:focus{border-color:var(--celeste)}
+.search button{position:absolute;right:6px;top:6px;width:40px;height:40px;border-radius:10px;background:transparent;color:var(--mut);font-size:20px}
+.tabs{display:flex;gap:6px;margin-top:10px}
+.tabs button{flex:1;height:38px;border-radius:10px;background:rgba(255,255,255,.12);color:#dbe5fb;font-size:14px;font-weight:600}
+.tabs button.on{background:var(--celeste);color:var(--azul)}
+
+/* lista */
+main{padding:6px 16px 110px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:14px;width:100%;text-align:left;color:var(--txt)}
+.row .n{flex:1;min-width:0}
+.row .n b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .n small{color:var(--mut);font-size:13px}
+.pill{flex:none;font-size:12px;font-weight:700;padding:6px 10px;border-radius:20px;background:var(--azulclaro);color:var(--azul)}
+.row.in{border-color:#9ad8b0;background:var(--verdeclaro)}
+.row.in .pill{background:var(--verde);color:#fff}
+.row.flash{animation:flash 1.2s}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--celeste)}100%{box-shadow:0 0 0 0 transparent}}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:6px;background:var(--celeste);color:var(--azul);margin-left:6px;vertical-align:2px}
+.empty{color:var(--mut);text-align:center;padding:40px 10px}
+.more{display:block;margin:14px auto;background:var(--card);border:1px solid var(--line);padding:10px 18px;border-radius:12px;color:var(--azul)}
+
+.fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));height:56px;padding:0 20px;border-radius:28px;background:var(--celeste);color:var(--azul);font-weight:800;font-size:16px;box-shadow:0 8px 22px rgba(0,48,135,.3);z-index:6}
+
+/* paneles */
+.veil{position:fixed;inset:0;background:rgba(10,22,40,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;background:#fff;border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92dvh;overflow:auto;border-top:5px solid var(--celeste)}
+.sheet h2{margin:0 0 4px;font-size:24px;color:var(--azul)}
+.sheet .meta{color:var(--mut);margin-bottom:16px}
+.btn{display:block;width:100%;height:56px;border-radius:14px;font-weight:800;font-size:18px;margin-top:10px;background:var(--azulclaro);color:var(--azul);border:1px solid var(--line)}
+.btn:disabled{opacity:.5}
+.btn.go{background:var(--verde);color:#fff;border:0;height:72px;font-size:22px}
+.btn.or{background:var(--azul);color:#fff;border:0}
+.btn.warn{background:#fff;color:var(--rojo);border:1px solid var(--rojo)}
+.btn.ghost{background:transparent;border:0;color:var(--mut);font-weight:600;height:46px}
+.btn.sm{height:46px;font-size:16px}
+.inbox{background:var(--verdeclaro);border:1px solid #9ad8b0;border-radius:14px;padding:14px;margin:6px 0 4px}
+.inbox b{color:var(--verde);font-size:20px}
+.alert{background:#fdecec;border:1px solid var(--rojo);border-radius:14px;padding:12px 14px;margin:8px 0;color:#7f1d1d}
+.ok{background:var(--verdeclaro);border:1px solid #9ad8b0;border-radius:12px;padding:10px 12px;margin-top:10px;color:#14532d;font-size:14px}
+label{display:block;color:var(--txt2);font-size:13px;font-weight:600;margin:12px 0 4px}
+.field{width:100%;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--txt);padding:0 14px;font-size:17px;outline:none}
+.field:focus{border-color:var(--azul2)}
+select.field{appearance:auto}
+.hint{color:var(--mut);font-size:13px;margin-top:6px}
+.chk{display:flex;align-items:center;gap:10px;margin-top:12px;color:var(--txt);font-weight:400;font-size:16px}
+.chk input{width:22px;height:22px;accent-color:var(--verde)}
+
+/* pantallas completas */
+.screen{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:24px 22px calc(24px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto}
+.screen h1{font-size:28px;margin:0 0 6px;color:var(--azul)}
+.screen p{color:var(--mut);margin:0 0 14px}
+.crest{width:110px;height:110px;margin-bottom:14px;object-fit:contain}
+.crest.sm{width:80px;height:80px}
+.hlogo{width:38px;height:38px;flex:none;object-fit:contain}
+.pin{letter-spacing:10px;text-align:center;font-size:28px;height:62px}
+
+/* organizador */
+.admin h3{margin:22px 0 6px;font-size:16px;color:var(--azul)}
+.box{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px}
+.linkbox{word-break:break-all;font-size:13px;color:var(--txt2);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+.prev{font-size:13px;color:var(--txt2);margin-top:10px;max-height:150px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+details summary{color:var(--azul2);font-weight:600;cursor:pointer;margin-top:4px}
+
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--txt);color:#fff;padding:12px 18px;border-radius:12px;z-index:40;max-width:90vw;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.demo{background:var(--celeste);color:var(--azul);text-align:center;font-size:12px;padding:4px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="layer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script type="module">
+/* =====================================================================
+   CONFIGURACIÓN
+   ===================================================================== */
+// Proyecto Firebase (el mismo de Tiburones y el Kiosko). Si apiKey dice
+// PEGAR_AQUI, la app corre en MODO DEMO (datos solo en este navegador).
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDtbHCCFpkuFxdJQBMUMVYKRaTCKDvw5vA",
+  authDomain: "kiosco-liceo.firebaseapp.com",
+  projectId: "kiosco-liceo",
+  storageBucket: "kiosco-liceo.firebasestorage.app",
+  messagingSenderId: "650410053332",
+  appId: "1:650410053332:web:c61ee15e64d461192c7541"
+};
+const CONFIG = {
+  evento: "Fiesta Matinée Liceo Naval",
+  precioPuerta: 20000,
+  pinPuerta: "3026",   // lo carga cada persona de la puerta una sola vez
+  pinAdmin: "874302",    // para conectar la planilla y crear el link
+  syncMinutos: 2       // cada cuánto se revisa la planilla de Drive
+};
+/* ===================================================================== */
+
+const DEMO = new URLSearchParams(location.search).has("demo") || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === "PEGAR_AQUI";
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+const fmtTime = ms => ms ? new Date(ms).toLocaleTimeString("es-AR", {hour:"2-digit", minute:"2-digit", hour12:false}) : "";
+const money = n => "$" + Number(n || 0).toLocaleString("es-AR");
+const LS = {
+  get(k, d = null){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} }
+};
+function hashId(str){ // FNV-1a → id estable: la misma persona nunca se duplica al releer la planilla
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return "f_" + (h >>> 0).toString(36);
+}
+function randCode(n = 20){
+  const a = "abcdefghjkmnpqrstuvwxyz23456789"; const b = new Uint32Array(n);
+  crypto.getRandomValues(b); return [...b].map(x => a[x % a.length]).join("");
+}
+function titleCase(s){
+  return String(s ?? "").trim().replace(/\s+/g, " ").toLowerCase()
+    .replace(/(^|[\s'-])(\p{L})/gu, (m, p, c) => p + c.toUpperCase());
+}
+
+/* ------------------------- estado ------------------------- */
+const S = {
+  ev: null, device: LS.get("pm_device"), people: new Map(), meta: {},
+  online: navigator.onLine, pending: false, tab: "faltan", q: "", limit: 80,
+  admin: false, flash: new Set(), ready: false,
+  sync: {at: null, err: null, running: false}
+};
+
+(function readEventFromUrl(){
+  const u = new URL(location.href); const e = u.searchParams.get("e");
+  if (e && /^[a-z0-9]{12,40}$/.test(e)){
+    LS.set("pm_event", e); u.searchParams.delete("e");
+    history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);
+  }
+  S.ev = LS.get("pm_event");
+})();
+
+/* ------------------------- capa de datos ------------------------- */
+let store;
+const BASE_FIELDS = ["nombre", "dni", "extra", "fuente"]; // lo único que trae la planilla
+
+function makeDemoStore(){
+  const key = () => "pm_demo_" + S.ev;
+  const bc = "BroadcastChannel" in window ? new BroadcastChannel("pm_demo") : null;
+  let cb = null;
+  const load = () => LS.get(key(), {meta:{}, people:{}});
+  const save = d => { LS.set(key(), d); emit(d); bc && bc.postMessage("x"); };
+  const emit = (d = load()) => cb && cb({meta: d.meta, people: Object.values(d.people), pending: false, changed: []});
+  bc && (bc.onmessage = () => emit());
+  window.addEventListener("storage", e => { if (e.key === key()) emit(); });
+  return {
+    subscribe(f){ cb = f; emit(); },
+    async createEvent(meta){ LS.set(key(), {meta, people:{}}); },
+    async saveMeta(m){ const d = load(); d.meta = {...d.meta, ...m}; save(d); },
+    async checkIn(id, device){
+      const d = load(); const p = d.people[id]; if (!p) throw new Error("No existe");
+      if (p.entro) return {already: true, p};
+      Object.assign(p, {entro: true, entroAt: Date.now(), entroPor: device}); save(d); return {ok: true};
+    },
+    async undo(id){ const d = load(); Object.assign(d.people[id], {entro:false, entroAt:null, entroPor:null}); save(d); },
+    async add(p){ const d = load(); d.people[p.id] = p; save(d); },
+    async addMany(list){ const d = load(); list.forEach(p => { d.people[p.id] = {...(d.people[p.id] || {}), ...pick(p), id: p.id}; }); save(d); },
+    async remove(id){ const d = load(); delete d.people[id]; save(d); }
+  };
+}
+const pick = p => Object.fromEntries(BASE_FIELDS.map(k => [k, p[k] ?? ""]));
+
+async function makeFirebaseStore(){
+  const V = "10.12.2", G = `https://www.gstatic.com/firebasejs/${V}/`;
+  const [{initializeApp}, {getAuth, signInAnonymously, onAuthStateChanged}, F] = await Promise.all([
+    import(G + "firebase-app.js"), import(G + "firebase-auth.js"), import(G + "firebase-firestore.js")
+  ]);
+  const app = initializeApp(FIREBASE_CONFIG, "puerta");
+  const auth = getAuth(app);
+  let db;
+  try { db = F.initializeFirestore(app, {localCache: F.persistentLocalCache({tabManager: F.persistentMultipleTabManager()})}); }
+  catch { db = F.getFirestore(app); }
+  await new Promise((res, rej) => {
+    const off = onAuthStateChanged(auth, u => { if (u){ off(); res(); } });
+    signInAnonymously(auth).catch(e => { if (!navigator.onLine) res(); else rej(e); });
+  });
+  const evRef = () => F.doc(db, "eventos", S.ev);
+  const col = () => F.collection(db, "eventos", S.ev, "asistentes");
+  const pRef = id => F.doc(db, "eventos", S.ev, "asistentes", id);
+  const toMs = t => t && t.toMillis ? t.toMillis() : (typeof t === "number" ? t : null);
+  return {
+    subscribe(f){
+      let meta = {}, people = [], pend = false, changed = [];
+      const send = () => f({meta, people, pending: pend, changed});
+      F.onSnapshot(evRef(), s => { meta = s.data() || {}; send(); }, showError);
+      F.onSnapshot(col(), {includeMetadataChanges: true}, s => {
+        changed = s.docChanges().filter(c => c.type === "modified" && !c.doc.metadata.hasPendingWrites).map(c => c.doc.id);
+        people = s.docs.map(d => { const x = d.data(); return {...x, id: d.id, entroAt: toMs(x.entroAt) || x.entroAtLocal || null}; });
+        pend = s.metadata.hasPendingWrites; send();
+      }, showError);
+    },
+    async createEvent(meta){ await F.setDoc(evRef(), {...meta, creado: F.serverTimestamp()}); },
+    async saveMeta(m){ await F.setDoc(evRef(), m, {merge: true}); },
+    async checkIn(id, device){
+      const data = {entro: true, entroAt: F.serverTimestamp(), entroAtLocal: Date.now(), entroPor: device};
+      if (navigator.onLine){
+        try {
+          return await F.runTransaction(db, async tx => {
+            const s = await tx.get(pRef(id));
+            if (!s.exists()) throw new Error("No existe");
+            const x = s.data();
+            if (x.entro) return {already: true, p: {...x, entroAt: toMs(x.entroAt) || x.entroAtLocal}};
+            tx.update(pRef(id), data); return {ok: true};
+          });
+        } catch (e) { if (e.message === "No existe") throw e; }
+      }
+      F.updateDoc(pRef(id), data).catch(showError); // queda en cola hasta que vuelva la señal
+      return {ok: true, queued: true};
+    },
+    async undo(id){ F.updateDoc(pRef(id), {entro: false, entroAt: null, entroAtLocal: null, entroPor: null}).catch(showError); },
+    async add(p){ const {id, ...rest} = p; F.setDoc(pRef(id), {...rest, entroAt: rest.entro ? F.serverTimestamp() : null}).catch(showError); },
+    async addMany(list){ // merge de los datos de la planilla: nunca pisa quién entró
+      for (let i = 0; i < list.length; i += 450){
+        const b = F.writeBatch(db);
+        list.slice(i, i + 450).forEach(p => b.set(pRef(p.id), pick(p), {merge: true}));
+        await b.commit();
+      }
+    },
+    async remove(id){ F.deleteDoc(pRef(id)).catch(showError); }
+  };
+}
+
+function showError(e){
+  console.error(e);
+  const m = String(e && (e.code || e.message) || e);
+  if (/permission/i.test(m)) toast("Sin permiso en la base. Revisá las reglas de Firestore.");
+  else if (/admin-restricted|operation-not-allowed/i.test(m)) toast("Activá 'Anónimo' en Firebase → Authentication.");
+  else toast("Error: " + m);
+}
+
+/* ------------------------- planilla de Drive ------------------------- */
+// Acepta el link de una Hoja de cálculo de Google (compartida "Cualquiera con el enlace")
+// o la URL de un Apps Script que devuelva CSV (opción privada, ver LEEME).
+function sourceUrls(url){
+  url = String(url || "").trim();
+  if (/script\.google(usercontent)?\.com\//.test(url)) return {urls: [url]};
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (m){
+    const gid = (url.match(/[#&?]gid=(\d+)/) || [])[1] || "0";
+    return {urls: [
+      `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv&gid=${gid}`,
+      `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&gid=${gid}`
+    ]};
+  }
+  if (/drive\.google\.com\/(file|open)/.test(url))
+    return {error: "Ese link es de un archivo (Excel) subido a Drive. Abrilo y hacé Archivo → Guardar como Hojas de cálculo de Google, y pegá el link de esa hoja."};
+  return {error: "No reconozco el link. Tiene que ser de una Hoja de cálculo de Google (docs.google.com/spreadsheets/…)."};
+}
+async function fetchSheet(url){
+  const src = sourceUrls(url); if (src.error) throw new Error(src.error);
+  if (!window.XLSX) throw new Error("No cargó el lector de planillas. Revisá la conexión.");
+  let lastErr;
+  for (const u of src.urls){
+    try {
+      const r = await fetch(u, {cache: "no-store", redirect: "follow"});
+      const text = await r.text();
+      if (!r.ok || /^\s*</.test(text)) { lastErr = new Error("PRIVADA"); continue; }
+      const wb = XLSX.read(text, {type: "string", raw: true});
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, defval: "", raw: false, blankrows: false});
+      if (!rows.length) throw new Error("La planilla está vacía.");
+      return {headers: rows[0].map(h => String(h).trim()), data: rows.slice(1)};
+    } catch (e){ lastErr = e; }
+  }
+  if (lastErr && (lastErr.message === "PRIVADA" || /fetch|network|cors/i.test(lastErr.message)))
+    throw new Error("No pude leer la planilla. En Drive: Compartir → Acceso general → \"Cualquier persona con el enlace\" → Lector.");
+  throw lastErr || new Error("No pude leer la planilla.");
+}
+
+const GUESS = {
+  nombre: /^(nombre(s)?( y apellido)?|nombre completo|apellido y nombre|name|full name)/i,
+  apellido: /^(apellido(s)?|last ?name|surname)$/i,
+  dni: /(dni|documento|n[uú]mero de doc)/i,
+  extra: /(invitad|curso|categor|divisi|colegio|escuela)/i
+};
+function guessMap(headers){
+  const used = []; const find = rx => { const i = headers.findIndex((h, j) => !used.includes(j) && rx.test(String(h).trim())); if (i >= 0) used.push(i); return i; };
+  const n = find(GUESS.nombre), a = find(GUESS.apellido), d = find(GUESS.dni), x = find(GUESS.extra);
+  return {nombre: headers[n] || "", apellido: headers[a] || "", dni: headers[d] || "", extra: headers[x] || ""};
+}
+function rowsToPeople(headers, data, map){
+  const ix = k => map[k] ? headers.indexOf(map[k]) : -1;
+  const iN = ix("nombre"), iA = ix("apellido"), iD = ix("dni"), iE = ix("extra");
+  if (iN < 0) return {list: [], dup: 0, skip: 0, missing: map.nombre};
+  const seen = new Map(); let dup = 0, skip = 0;
+  for (const r of data){
+    const nombre = titleCase([r[iN], iA >= 0 ? r[iA] : ""].join(" "));
+    if (!nombre){ skip++; continue; }
+    const dni = iD >= 0 ? String(r[iD]).replace(/\D/g, "") : "";
+    const extra = iE >= 0 ? String(r[iE]).trim().slice(0, 60) : "";
+    const id = hashId(norm(nombre) + "|" + dni);
+    if (seen.has(id)){ dup++; continue; }
+    seen.set(id, {id, nombre, dni, extra, fuente: "form"});
+  }
+  return {list: [...seen.values()], dup, skip};
+}
+
+// Revisa la planilla y agrega a los nuevos. Corre sola cada pocos minutos en todos los celulares.
+async function syncDrive({manual = false} = {}){
+  const url = S.meta.fuenteUrl, map = S.meta.mapa;
+  if (!url || !map || S.sync.running || (!manual && !navigator.onLine)) return;
+  S.sync.running = true; drawHeader();
+  try {
+    const {headers, data} = await fetchSheet(url);
+    const {list, missing} = rowsToPeople(headers, data, map);
+    if (missing) throw new Error(`La planilla ya no tiene la columna "${missing}". Volvé a elegir columnas en ⚙️.`);
+    const nuevos = list.filter(p => !S.people.has(p.id));
+    if (nuevos.length) await store.addMany(nuevos);
+    S.sync.at = Date.now(); S.sync.err = null;
+    if (manual) toast(nuevos.length ? `✔ ${nuevos.length} nuevos desde Drive` : "✔ Lista al día, no hay nuevos");
+    else if (nuevos.length) toast(`Drive: ${nuevos.length} nuevo${nuevos.length > 1 ? "s" : ""} en la lista`);
+    return nuevos.length;
+  } catch (e){
+    S.sync.err = e.message; if (manual) toast(e.message, 5000);
+    throw e;
+  } finally { S.sync.running = false; drawHeader(); }
+}
+
+/* ------------------------- UI helpers ------------------------- */
+let toastT;
+function toast(msg, ms = 2600){
+  let t = $(".toast"); if (!t){ t = document.createElement("div"); t.className = "toast"; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.remove("hidden"); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.add("hidden"), ms);
+}
+function buzz(p){ try { navigator.vibrate && navigator.vibrate(p); } catch {} }
+function sheet(html, onMount){
+  const L = $("#layer");
+  L.innerHTML = `<div class="veil"><div class="sheet">${html}</div></div>`;
+  const v = $(".veil", L);
+  v.addEventListener("click", e => { if (e.target === v) closeSheet(); });
+  onMount && onMount($(".sheet", L));
+}
+function closeSheet(){ $("#layer").innerHTML = ""; }
+const demoBar = txt => DEMO ? `<div class="demo">${txt}</div>` : "";
+
+/* ------------------------- pantallas ------------------------- */
+function render(){
+  const app = $("#app");
+  if (!S.ev) return renderNoEvent(app);
+  if (!LS.get("pm_pin_ok_" + S.ev)) return renderPin(app);
+  if (!S.device) return renderDevice(app);
+  if (!S.ready){ app.innerHTML = `<div class="screen"><img class="crest" src="logo.png" alt=""><h1>Cargando lista…</h1><p>Un segundo.</p></div>`; return; }
+  renderMain(app);
+}
+
+function renderNoEvent(app){
+  app.innerHTML = `${demoBar("MODO DEMO — sin Firebase")}
+  <div class="screen">
+    <img class="crest" src="logo.png" alt="Centro de Graduados del Liceo Naval Militar">
+    <h1>Control de entrada</h1>
+    <p>Esta app es para el equipo de puerta. Abrí el link que te pasó el organizador por WhatsApp.</p>
+    <button class="btn ghost" id="org">Soy organizador</button>
+  </div>`;
+  $("#org").onclick = () => askPin("PIN de organizador", CONFIG.pinAdmin, async () => {
+    S.ev = randCode(); LS.set("pm_event", S.ev);
+    await boot(true);
+    LS.set("pm_pin_ok_" + S.ev, true); S.admin = true;
+    render(); if (S.device) openAdmin();
+  });
+}
+
+function renderPin(app){
+  app.innerHTML = `<div class="screen">
+    <img class="crest sm" src="logo.png" alt=""><h1>PIN de puerta</h1>
+    <p>Pedíselo al organizador. Se carga una sola vez en este teléfono.</p>
+    <input class="field pin" id="pin" inputmode="numeric" type="password" autocomplete="off" maxlength="8">
+    <button class="btn or" id="ok">Entrar</button>
+  </div>`;
+  const go = () => {
+    const v = $("#pin").value.trim();
+    if (v === CONFIG.pinPuerta || v === CONFIG.pinAdmin){
+      LS.set("pm_pin_ok_" + S.ev, true); if (v === CONFIG.pinAdmin) S.admin = true; render();
+    } else { buzz([80,60,80]); toast("PIN incorrecto"); $("#pin").value = ""; }
+  };
+  $("#ok").onclick = go; $("#pin").onkeydown = e => e.key === "Enter" && go(); $("#pin").focus();
+}
+
+function renderDevice(app){
+  app.innerHTML = `<div class="screen">
+    <img class="crest sm" src="logo.png" alt=""><h1>¿Quién controla?</h1>
+    <p>Un nombre corto para saber desde qué celular se marcó cada ingreso.</p>
+    <input class="field" id="dev" placeholder="Ej: Puerta - Chelo" maxlength="24">
+    <button class="btn or" id="ok">Listo</button>
+  </div>`;
+  const go = () => {
+    const v = $("#dev").value.trim(); if (!v) return; S.device = v; LS.set("pm_device", v); render();
+    if (S.admin && !S.people.size) setTimeout(openAdmin, 150);
+  };
+  $("#ok").onclick = go; $("#dev").onkeydown = e => e.key === "Enter" && go(); $("#dev").focus();
+}
+
+function filtered(){
+  const q = norm(S.q); const toks = q ? q.split(" ") : [];
+  let list = [...S.people.values()];
+  if (toks.length) list = list.filter(p => { const h = p._s || (p._s = norm(`${p.nombre} ${p.dni || ""} ${p.extra || ""}`)); return toks.every(t => h.includes(t)); });
+  // buscando, en "Faltan" también aparecen los que ya entraron (para avisar)
+  if (S.tab === "faltan" && !toks.length) list = list.filter(p => !p.entro);
+  if (S.tab === "adentro") list = list.filter(p => p.entro);
+  if (S.tab === "adentro") list.sort((a, b) => (b.entroAt || 0) - (a.entroAt || 0));
+  else list.sort((a, b) => (a._k || (a._k = norm(a.nombre))).localeCompare(b._k || (b._k = norm(b.nombre))));
+  return list;
+}
+
+function renderMain(app){
+  if (!$("#main", app)){
+    app.innerHTML = `${demoBar("MODO DEMO — los datos quedan solo en este navegador")}
+    <div id="main">
+      <header>
+        <div class="hrow">
+          <img class="hlogo" src="logo.png" alt="">
+          <div class="title"><b id="evname"></b><small><span class="dot" id="dot"></span> <span id="devname"></span></small></div>
+          <button class="iconbtn" id="cfg" aria-label="Organizador">⚙️</button>
+        </div>
+        <div class="stats">
+          <div class="big"><b id="cin">0</b><span id="ctot">de 0 adentro</span></div>
+          <div class="bar"><i id="cbar"></i></div>
+          <div class="sub"><span id="cfal"></span><span id="cpue"></span></div>
+          <div class="sub"><span id="csync"></span></div>
+        </div>
+        <div class="search"><input id="q" placeholder="Buscar nombre o DNI" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="qx" class="hidden" aria-label="Borrar">✕</button></div>
+        <div class="tabs"><button data-t="faltan">Faltan</button><button data-t="adentro">Adentro</button><button data-t="todos">Todos</button></div>
+      </header>
+      <main id="list"></main>
+      <button class="fab" id="fab">＋ Venta en puerta</button>
+    </div>`;
+    const q = $("#q");
+    q.oninput = () => { S.q = q.value; S.limit = 80; $("#qx").classList.toggle("hidden", !q.value); drawList(); };
+    $("#qx").onclick = () => { clearSearch(); q.focus(); };
+    app.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { S.tab = b.dataset.t; S.limit = 80; drawHeader(); drawList(); });
+    $("#cfg").onclick = () => S.admin ? openAdmin() : askPin("PIN de organizador", CONFIG.pinAdmin, () => { S.admin = true; openAdmin(); });
+    $("#fab").onclick = openDoorSale;
+    $("#list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) openPerson(r.dataset.id); else if (e.target.id === "more"){ S.limit += 200; drawList(); } });
+  }
+  drawHeader(); drawList();
+}
+function clearSearch(){ const q = $("#q"); if (!q) return; q.value = ""; S.q = ""; $("#qx").classList.add("hidden"); drawList(); }
+
+function drawHeader(){
+  if (!$("#main")) return;
+  const all = [...S.people.values()], tot = all.length, inn = all.filter(p => p.entro).length;
+  const pue = all.filter(p => p.fuente === "puerta");
+  $("#evname").textContent = S.meta.nombre || CONFIG.evento;
+  $("#devname").textContent = `${S.device} · ${S.online ? (S.pending ? "sincronizando…" : "en línea") : "SIN SEÑAL — se guarda y sube después"}`;
+  $("#dot").className = "dot" + (!S.online ? " off" : S.pending ? " sync" : "");
+  $("#cin").textContent = inn; $("#ctot").textContent = `de ${tot} adentro`;
+  $("#cbar").style.width = tot ? (inn / tot * 100) + "%" : "0";
+  $("#cfal").textContent = `Faltan ${tot - inn}`;
+  $("#cpue").textContent = pue.length ? `Puerta: ${pue.length} · ${money(pue.reduce((s, p) => s + (p.monto || 0), 0))}` : "";
+  $("#csync").textContent = !S.meta.fuenteUrl ? "" : S.sync.running ? "Drive: revisando…" : S.sync.err ? "Drive: ⚠ no se pudo leer" : S.sync.at ? `Drive: al día ${fmtTime(S.sync.at)}` : "Drive: conectado";
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === S.tab));
+}
+
+function drawList(){
+  const el = $("#list"); if (!el) return;
+  if (!S.people.size){
+    el.innerHTML = `<div class="empty">Todavía no hay lista cargada.<br>${S.admin ? "Tocá ⚙️ para conectar la planilla de Drive." : "El organizador la tiene que conectar."}</div>`; return;
+  }
+  const list = filtered();
+  if (!list.length){
+    el.innerHTML = `<div class="empty">${S.q ? `No aparece “${esc(S.q)}”.<br><br>¿Pagó en puerta? Usá <b>＋ Venta en puerta</b>.` : S.tab === "faltan" ? "¡Entraron todos! 🎉" : "Nadie por acá todavía."}</div>`; return;
+  }
+  el.innerHTML = list.slice(0, S.limit).map(p => `
+    <button class="row ${p.entro ? "in" : ""} ${S.flash.has(p.id) ? "flash" : ""}" data-id="${esc(p.id)}">
+      <div class="n"><b>${esc(p.nombre)}${p.fuente === "puerta" ? '<span class="tag">puerta</span>' : ""}</b>
+      <small>${[p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || "")].filter(Boolean).join(" · ") || "&nbsp;"}</small></div>
+      <span class="pill">${p.entro ? "✔ " + fmtTime(p.entroAt) : "Falta"}</span>
+    </button>`).join("") + (list.length > S.limit ? `<button class="more" id="more">Ver ${list.length - S.limit} más</button>` : "");
+  S.flash.clear();
+}
+
+function openPerson(id){
+  const p = S.people.get(id); if (!p) return;
+  const info = [p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), p.fuente === "puerta" ? "Venta en puerta" : ""].filter(Boolean).join(" · ");
+  sheet(`
+    <h2>${esc(p.nombre)}</h2><div class="meta">${info || "&nbsp;"}</div>
+    ${p.entro
+      ? `<div class="inbox"><b>✔ Ya entró</b><br>${fmtTime(p.entroAt)} hs · marcado por ${esc(p.entroPor || "?")}</div>
+         <button class="btn warn" id="undo">Deshacer ingreso</button>`
+      : `<button class="btn go" id="go">✔ MARCAR INGRESO</button>`}
+    ${S.admin ? `<button class="btn ghost" id="del">Borrar de la lista</button>` : ""}
+    <button class="btn ghost" id="x">Cerrar</button>`, el => {
+    $("#x", el).onclick = closeSheet;
+    const go = $("#go", el);
+    if (go) go.onclick = async () => {
+      go.disabled = true;
+      try {
+        const r = await store.checkIn(id, S.device);
+        if (r.already){
+          buzz([120,80,120]);
+          sheet(`<h2>${esc(p.nombre)}</h2><div class="alert"><b>⚠ YA HABÍA ENTRADO</b><br>${fmtTime(r.p.entroAt)} hs · marcado por ${esc(r.p.entroPor || "?")}</div><button class="btn" id="x">Entendido</button>`, e2 => $("#x", e2).onclick = closeSheet);
+          return;
+        }
+        buzz(40); closeSheet(); toast(`✔ ${p.nombre} adentro${r.queued ? " (se sube al volver la señal)" : ""}`);
+        if (S.q) clearSearch();
+      } catch (e){ showError(e); go.disabled = false; }
+    };
+    const un = $("#undo", el);
+    if (un) un.onclick = () => {
+      if (un.dataset.c){ store.undo(id); closeSheet(); toast("Ingreso deshecho"); }
+      else { un.dataset.c = 1; un.textContent = "Tocá de nuevo para confirmar"; }
+    };
+    const del = $("#del", el);
+    if (del) del.onclick = () => {
+      if (del.dataset.c){ store.remove(id); closeSheet(); toast("Borrado"); }
+      else { del.dataset.c = 1; del.textContent = "Tocá de nuevo para borrar (si sigue en la planilla, vuelve)"; del.style.color = "var(--rojo)"; }
+    };
+  });
+}
+
+function openDoorSale(){
+  const precio = S.meta.precioPuerta ?? CONFIG.precioPuerta;
+  sheet(`
+    <h2>Venta en puerta</h2><div class="meta">Se agrega a la lista y queda marcado como adentro.</div>
+    <label>Nombre y apellido</label><input class="field" id="n" autocomplete="off" value="${esc(titleCase(S.q))}">
+    <label>DNI (opcional)</label><input class="field" id="d" inputmode="numeric" autocomplete="off">
+    <label>Monto cobrado</label><input class="field" id="m" inputmode="numeric" value="${precio}">
+    <label class="chk"><input type="checkbox" id="e" checked> Marcar ingreso ahora</label>
+    <button class="btn or" id="ok">Agregar</button>
+    <button class="btn ghost" id="x">Cancelar</button>`, el => {
+    $("#x", el).onclick = closeSheet; setTimeout(() => $("#n", el).focus(), 50);
+    $("#ok", el).onclick = async () => {
+      const nombre = titleCase($("#n", el).value); if (!nombre){ toast("Falta el nombre"); return; }
+      const entro = $("#e", el).checked;
+      const p = {id: "p_" + randCode(10), nombre, dni: $("#d", el).value.replace(/\D/g, ""), extra: "",
+        fuente: "puerta", monto: Number($("#m", el).value.replace(/\D/g, "")) || 0, vendidoPor: S.device,
+        entro, entroAt: entro ? Date.now() : null, entroAtLocal: entro ? Date.now() : null, entroPor: entro ? S.device : null};
+      await store.add(p); buzz(40); closeSheet(); toast(`✔ ${nombre} agregado${entro ? " y adentro" : ""}`);
+      clearSearch();
+    };
+  });
+}
+
+function askPin(title, expected, ok){
+  sheet(`<h2>${esc(title)}</h2>
+    <input class="field pin" id="p" inputmode="numeric" type="password" autocomplete="off" maxlength="8" style="margin-top:12px">
+    <button class="btn or" id="ok">Continuar</button><button class="btn ghost" id="x">Cancelar</button>`, el => {
+    const go = () => { if ($("#p", el).value.trim() === expected){ closeSheet(); ok(); } else { buzz([80,60,80]); toast("PIN incorrecto"); $("#p", el).value = ""; } };
+    $("#ok", el).onclick = go; $("#x", el).onclick = closeSheet; $("#p", el).onkeydown = e => e.key === "Enter" && go();
+    setTimeout(() => $("#p", el).focus(), 50);
+  });
+}
+
+/* ------------------------- organizador ------------------------- */
+function shareLink(){ return location.origin + location.pathname + "?e=" + S.ev; }
+
+function openAdmin(){
+  const all = [...S.people.values()], m = S.meta;
+  sheet(`<div class="admin">
+    <h2>Organizador</h2>
+    <div class="meta">${all.length} en la lista · ${all.filter(p => p.entro).length} adentro</div>
+
+    <h3>1. Lista desde Drive</h3>
+    <div class="box" id="drive">
+      ${m.fuenteUrl ? `
+        <div class="ok">✔ Conectada. Se revisa sola cada ${CONFIG.syncMinutos} min y agrega a los nuevos.<br>
+        Columnas: ${esc([m.mapa?.nombre, m.mapa?.apellido, m.mapa?.dni, m.mapa?.extra].filter(Boolean).join(", "))}</div>
+        ${S.sync.err ? `<div class="alert">${esc(S.sync.err)}</div>` : ""}
+        <div class="linkbox">${esc(m.fuenteUrl)}</div>
+        <button class="btn or sm" id="syncnow">Actualizar ahora</button>
+        <button class="btn sm" id="change">Cambiar planilla o columnas</button>`
+      : driveFormHtml()}
+    </div>
+
+    <h3>2. Pasar el link al equipo de puerta</h3>
+    <div class="box">
+      <div class="hint" style="margin-top:0">Mandalo por WhatsApp solo al equipo de puerta, junto con el PIN de puerta. Cada uno lo abre y lo agrega a la pantalla de inicio.</div>
+      <div class="linkbox">${esc(shareLink())}</div>
+      <button class="btn or sm" id="share">Compartir link</button>
+    </div>
+
+    <h3>3. Evento</h3>
+    <div class="box">
+      <label style="margin-top:0">Nombre</label><input class="field" id="evn" value="${esc(m.nombre || CONFIG.evento)}">
+      <label>Precio en puerta</label><input class="field" id="evp" inputmode="numeric" value="${m.precioPuerta ?? CONFIG.precioPuerta}">
+      <button class="btn sm" id="savem">Guardar</button>
+    </div>
+
+    <h3>Al final de la noche</h3>
+    <button class="btn sm" id="exp">Descargar planilla de asistencia (CSV)</button>
+
+    <details style="margin-top:18px"><summary>¿Sin Drive? Importar un archivo Excel/CSV</summary>
+      <div class="box" style="margin-top:8px">
+        <input type="file" id="file" accept=".csv,.xlsx,.xls,.ods,text/csv" class="field" style="padding:10px;height:auto">
+        <div id="fmap"></div>
+      </div>
+    </details>
+    <button class="btn ghost" id="dev">Cambiar nombre de este celular</button>
+    <button class="btn ghost" id="x">Cerrar</button>
+  </div>`, el => {
+    $("#x", el).onclick = closeSheet;
+    wireDriveForm(el);
+    const sn = $("#syncnow", el); if (sn) sn.onclick = async () => { sn.disabled = true; sn.textContent = "Leyendo planilla…"; try { await syncDrive({manual: true}); closeSheet(); } catch { sn.disabled = false; sn.textContent = "Actualizar ahora"; } };
+    const ch = $("#change", el); if (ch) ch.onclick = () => { $("#drive", el).innerHTML = driveFormHtml(m.fuenteUrl); wireDriveForm(el); };
+    $("#file", el).onchange = e => e.target.files[0] && importFile(e.target.files[0], $("#fmap", el));
+    $("#share", el).onclick = async () => {
+      const text = `Control de entrada – ${S.meta.nombre || CONFIG.evento}\n${shareLink()}`;
+      try { if (navigator.share){ await navigator.share({text}); return; } } catch { return; }
+      try { await navigator.clipboard.writeText(shareLink()); toast("Link copiado"); } catch { toast("Copialo a mano del recuadro"); }
+    };
+    $("#savem", el).onclick = async () => {
+      await store.saveMeta({nombre: $("#evn", el).value.trim() || CONFIG.evento, precioPuerta: Number($("#evp", el).value.replace(/\D/g, "")) || 0});
+      toast("Guardado");
+    };
+    $("#exp", el).onclick = exportCsv;
+    $("#dev", el).onclick = () => { LS.del("pm_device"); S.device = null; closeSheet(); render(); };
+  });
+}
+
+function driveFormHtml(val = ""){
+  return `<div class="hint" style="margin-top:0">Abrí la planilla en Drive → <b>Compartir</b> → Acceso general: <b>Cualquier persona con el enlace</b> (Lector) → <b>Copiar vínculo</b>, y pegalo acá.</div>
+    <input class="field" id="surl" placeholder="https://docs.google.com/spreadsheets/d/…" value="${esc(val)}" style="margin-top:10px" autocomplete="off">
+    <button class="btn or sm" id="sread">Leer planilla</button>
+    <div id="smap"></div>`;
+}
+function wireDriveForm(el){
+  const b = $("#sread", el); if (!b) return;
+  b.onclick = async () => {
+    const url = $("#surl", el).value.trim(); if (!url){ toast("Pegá el link de la planilla"); return; }
+    b.disabled = true; b.textContent = "Leyendo…"; $("#smap", el).innerHTML = "";
+    try {
+      const {headers, data} = await fetchSheet(url);
+      mappingUI($("#smap", el), headers, data, S.meta.mapa, "Conectar y cargar", async (map, nuevos) => {
+        S.sync.at = Date.now(); S.sync.err = null;
+        await store.saveMeta({fuenteUrl: url, mapa: map});
+        if (nuevos.length) await store.addMany(nuevos);
+        toast(`✔ Planilla conectada · ${nuevos.length} personas cargadas`); closeSheet();
+      });
+    } catch (e){ $("#smap", el).innerHTML = `<div class="alert">${esc(e.message)}</div>`; }
+    b.disabled = false; b.textContent = "Leer planilla";
+  };
+}
+
+// Pantalla para elegir qué columna es cada cosa. Solo se suben esas columnas.
+function mappingUI(box, headers, data, prevMap, label, onOk){
+  const g = prevMap && headers.includes(prevMap.nombre) ? prevMap : guessMap(headers);
+  const opts = sel => `<option value="">— ninguna —</option>` + headers.map((h, i) => h ? `<option ${h === sel ? "selected" : ""}>${esc(h)}</option>` : "").join("");
+  box.innerHTML = `
+    <div class="hint">${data.length} filas. Elegí qué columna es cada cosa (solo se sube eso; teléfonos, mails y comprobantes quedan en la planilla):</div>
+    <label>Nombre (o nombre y apellido)</label><select class="field" data-k="nombre">${opts(g.nombre)}</select>
+    <label>Apellido (si viene aparte)</label><select class="field" data-k="apellido">${opts(g.apellido)}</select>
+    <label>DNI</label><select class="field" data-k="dni">${opts(g.dni)}</select>
+    <label>Dato extra para mostrar (ej. invitado de, curso)</label><select class="field" data-k="extra">${opts(g.extra)}</select>
+    <div class="prev" id="pv"></div>
+    <button class="btn go" id="imp" style="height:58px;font-size:18px">${label}</button>`;
+  const readMap = () => Object.fromEntries([...box.querySelectorAll("select")].map(s => [s.dataset.k, s.value]));
+  const preview = () => {
+    const {list, dup, skip} = rowsToPeople(headers, data, readMap());
+    const nuevos = list.filter(p => !S.people.has(p.id));
+    $("#pv", box).innerHTML = list.length
+      ? `<b>${nuevos.length} nuevos</b> · ${list.length - nuevos.length} ya estaban${dup ? ` · ${dup} repetidos (se cargan una vez)` : ""}${skip ? ` · ${skip} filas sin nombre` : ""}<br><br>` +
+        list.slice(0, 6).map(p => esc(p.nombre) + (p.dni ? " · " + esc(p.dni) : "") + (p.extra ? " · " + esc(p.extra) : "")).join("<br>") + (list.length > 6 ? "<br>…" : "")
+      : "Elegí la columna del nombre.";
+    $("#imp", box).disabled = !list.length;
+    return nuevos;
+  };
+  box.querySelectorAll("select").forEach(s => s.onchange = preview);
+  preview();
+  $("#imp", box).onclick = async () => {
+    const nuevos = preview(); const btn = $("#imp", box);
+    btn.disabled = true; btn.textContent = "Subiendo…";
+    try { await onOk(readMap(), nuevos); } catch (e){ showError(e); btn.disabled = false; btn.textContent = label; }
+  };
+}
+
+async function importFile(file, box){
+  if (!window.XLSX){ box.innerHTML = `<div class="alert">No cargó el lector de planillas. Revisá la conexión.</div>`; return; }
+  try {
+    const wb = XLSX.read(await file.arrayBuffer(), {type: "array", raw: false, codepage: 65001});
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, defval: "", raw: false, blankrows: false});
+    if (rows.length < 2){ box.innerHTML = `<div class="alert">El archivo está vacío.</div>`; return; }
+    mappingUI(box, rows[0].map(h => String(h).trim()), rows.slice(1), null, "Importar", async (map, nuevos) => {
+      if (nuevos.length) await store.addMany(nuevos);
+      toast(`✔ ${nuevos.length} personas importadas`); closeSheet();
+    });
+  } catch (e){ box.innerHTML = `<div class="alert">No pude leer el archivo: ${esc(e.message)}</div>`; }
+}
+
+function exportCsv(){
+  const rows = [["Nombre", "DNI", "Extra", "Origen", "Monto puerta", "Entró", "Hora", "Marcado por"]];
+  [...S.people.values()].sort((a, b) => norm(a.nombre).localeCompare(norm(b.nombre))).forEach(p =>
+    rows.push([p.nombre, p.dni || "", p.extra || "", p.fuente === "puerta" ? "Puerta" : "Planilla", p.monto || "", p.entro ? "Sí" : "No", fmtTime(p.entroAt), p.entroPor || ""]));
+  const csv = "﻿" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
+  a.download = "asistencia-" + new Date().toISOString().slice(0, 10) + ".csv"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ------------------------- arranque ------------------------- */
+let booted = false, syncTimer = null;
+async function boot(creating = false){
+  if (!store){
+    try { store = DEMO ? makeDemoStore() : await makeFirebaseStore(); }
+    catch (e){ showError(e); $("#app").innerHTML = `<div class="screen"><div class="crest">⚠️</div><h1>No pude conectar</h1><p>Revisá la conexión y volvé a abrir la app.</p></div>`; return; }
+  }
+  if (creating) await store.createEvent({nombre: CONFIG.evento, precioPuerta: CONFIG.precioPuerta});
+  if (booted) return; booted = true;
+  store.subscribe(({meta, people, pending, changed}) => {
+    const hadUrl = S.meta.fuenteUrl;
+    S.meta = meta || {}; S.pending = pending;
+    const prev = S.people; S.people = new Map(people.map(p => [p.id, p]));
+    if (S.ready) changed.forEach(id => { const a = prev.get(id), b = S.people.get(id); if (b && b.entro && !(a && a.entro)) S.flash.add(id); });
+    const first = !S.ready; S.ready = true;
+    if (first || !$("#main")) render(); else { drawHeader(); if (!document.querySelector(".sheet")) drawList(); else S.flash.clear(); }
+    if (S.meta.fuenteUrl && (!hadUrl || first)) startAutoSync();
+  });
+}
+function startAutoSync(){
+  clearInterval(syncTimer);
+  const tick = () => { if (document.visibilityState === "visible") syncDrive().catch(() => {}); };
+  setTimeout(tick, 1500 + Math.random() * 3000);            // al abrir
+  syncTimer = setInterval(tick, CONFIG.syncMinutos * 60000 + Math.random() * 20000);
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && S.meta.fuenteUrl && (!S.sync.at || Date.now() - S.sync.at > 60000)) syncDrive().catch(() => {});
+});
+window.addEventListener("online", () => { S.online = true; drawHeader(); });
+window.addEventListener("offline", () => { S.online = false; drawHeader(); });
+new MutationObserver(() => { if (!$("#layer").children.length) drawList(); }).observe($("#layer"), {childList: true});
+
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+render();
+if (S.ev) boot();
+</script>
+</body>
+</html>

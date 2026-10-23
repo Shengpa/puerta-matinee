@@ -1,0 +1,15 @@
+{
+  "name": "Puerta Matinée",
+  "short_name": "Puerta",
+  "description": "Control de entrada de la Fiesta Matinée",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f7ff",
+  "theme_color": "#003087",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Cada evento vive en /eventos/{codigo}. El código va solo en el link que
+    // se pasa por WhatsApp, así que hay que conocerlo para leer la lista.
+    match /eventos/{ev} {
+      allow get, create, update: if request.auth != null;
+      allow list, delete: if false;   // nadie puede listar todos los eventos
+
+      match /asistentes/{id} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // Si ya usás este proyecto para otras apps (ej. el Kiosko), dejá abajo
+    // las reglas que ya tenías para sus colecciones.
+  }
+}
