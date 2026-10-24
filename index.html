@@ -19,8 +19,20 @@
   --celeste:#33A3DC; --celeste2:#6cc4f0;
   --bg:#f4f7ff; --card:#fff; --line:#c5d4ed;
   --txt:#0a1628; --txt2:#334155; --mut:#64748b;
-  --verde:#16a34a; --verdeclaro:#e7f7ed; --rojo:#dc2626;
+  --verde:#16a34a; --verdeclaro:#e7f7ed; --verdeline:#9ad8b0; --rojo:#dc2626;
+  --naranja:#ea580c; --naranjaclaro:#fff1e8; --naranjaline:#f7c4a3;
+  --acento:#003087; --hdr:#003087; --alertbg:#fdecec; --alerttxt:#7f1d1d; --oktxt:#14532d;
   --r:16px;
+  color-scheme:light;
+}
+/* modo oscuro: para la puerta de noche */
+:root[data-theme="dark"]{
+  --bg:#0b1220; --card:#141d31; --line:#26324a;
+  --txt:#e8eefc; --txt2:#c3cde2; --mut:#8b98b3;
+  --azulclaro:#1b2a4a; --verdeclaro:#0f2e1d; --verdeline:#1f6b45;
+  --naranjaclaro:#3a1d0c; --naranjaline:#8a3d12;
+  --acento:#8fd0f5; --hdr:#0a1a45; --alertbg:#3a0f16; --alerttxt:#ffd6de; --oktxt:#b9f2cf;
+  color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -30,7 +42,7 @@ input,select{font:inherit}
 .hidden{display:none!important}
 
 /* encabezado azul */
-header{position:sticky;top:0;z-index:5;background:var(--azul);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 12px;border-radius:0 0 20px 20px;box-shadow:0 6px 18px rgba(0,48,135,.25)}
+header{position:sticky;top:0;z-index:5;background:var(--hdr);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 12px;border-radius:0 0 20px 20px;box-shadow:0 6px 18px rgba(0,48,135,.25)}
 .hrow{display:flex;align-items:center;gap:10px}
 .title{flex:1;min-width:0}
 .title b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -49,11 +61,11 @@ header{position:sticky;top:0;z-index:5;background:var(--azul);color:#fff;padding
 .stats .sub{display:flex;justify-content:space-between;gap:8px;color:#c9d7f5;font-size:13px;margin-top:6px}
 
 .search{margin-top:10px;position:relative}
-.search input{width:100%;height:52px;border-radius:14px;border:2px solid transparent;background:#fff;color:var(--txt);padding:0 44px 0 16px;font-size:18px;outline:none}
+.search input{width:100%;height:52px;border-radius:14px;border:2px solid transparent;background:var(--card);color:var(--txt);padding:0 44px 0 16px;font-size:18px;outline:none}
 .search input:focus{border-color:var(--celeste)}
 .search button{position:absolute;right:6px;top:6px;width:40px;height:40px;border-radius:10px;background:transparent;color:var(--mut);font-size:20px}
 .tabs{display:flex;gap:6px;margin-top:10px}
-.tabs button{flex:1;height:38px;border-radius:10px;background:rgba(255,255,255,.12);color:#dbe5fb;font-size:14px;font-weight:600}
+.tabs button{flex:1;min-width:0;height:38px;border-radius:10px;background:rgba(255,255,255,.12);color:#dbe5fb;font-size:13px;font-weight:600;white-space:nowrap;padding:0 4px}
 .tabs button.on{background:var(--celeste);color:var(--azul)}
 
 /* lista */
@@ -62,33 +74,50 @@ main{padding:6px 16px 110px}
 .row .n{flex:1;min-width:0}
 .row .n b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .n small{color:var(--mut);font-size:13px}
-.pill{flex:none;font-size:12px;font-weight:700;padding:6px 10px;border-radius:20px;background:var(--azulclaro);color:var(--azul)}
-.row.in{border-color:#9ad8b0;background:var(--verdeclaro)}
+.pill{flex:none;font-size:12px;font-weight:700;padding:6px 10px;border-radius:20px;background:var(--azulclaro);color:var(--acento)}
+.row.in{border-color:var(--verdeline);background:var(--verdeclaro)}
 .row.in .pill{background:var(--verde);color:#fff}
+.row.out{border-color:var(--naranjaline);background:var(--naranjaclaro)}
+.row.out .pill{background:var(--naranja);color:#fff}
 .row.flash{animation:flash 1.2s}
 @keyframes flash{0%{box-shadow:0 0 0 3px var(--celeste)}100%{box-shadow:0 0 0 0 transparent}}
 .tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:6px;background:var(--celeste);color:var(--azul);margin-left:6px;vertical-align:2px}
 .empty{color:var(--mut);text-align:center;padding:40px 10px}
-.more{display:block;margin:14px auto;background:var(--card);border:1px solid var(--line);padding:10px 18px;border-radius:12px;color:var(--azul)}
+.more{display:block;margin:14px auto;background:var(--card);border:1px solid var(--line);padding:10px 18px;border-radius:12px;color:var(--acento)}
 
 .fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));height:56px;padding:0 20px;border-radius:28px;background:var(--celeste);color:var(--azul);font-weight:800;font-size:16px;box-shadow:0 8px 22px rgba(0,48,135,.3);z-index:6}
 
 /* paneles */
 .veil{position:fixed;inset:0;background:rgba(10,22,40,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:520px;background:#fff;border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92dvh;overflow:auto;border-top:5px solid var(--celeste)}
-.sheet h2{margin:0 0 4px;font-size:24px;color:var(--azul)}
+.sheet{width:100%;max-width:520px;background:var(--card);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92dvh;overflow:auto;border-top:5px solid var(--celeste)}
+.sheet h2{margin:0 0 4px;font-size:24px;color:var(--acento)}
 .sheet .meta{color:var(--mut);margin-bottom:16px}
-.btn{display:block;width:100%;height:56px;border-radius:14px;font-weight:800;font-size:18px;margin-top:10px;background:var(--azulclaro);color:var(--azul);border:1px solid var(--line)}
+.btn{display:block;width:100%;height:56px;border-radius:14px;font-weight:800;font-size:18px;margin-top:10px;background:var(--azulclaro);color:var(--acento);border:1px solid var(--line)}
 .btn:disabled{opacity:.5}
 .btn.go{background:var(--verde);color:#fff;border:0;height:72px;font-size:22px}
 .btn.or{background:var(--azul);color:#fff;border:0}
-.btn.warn{background:#fff;color:var(--rojo);border:1px solid var(--rojo)}
+.btn.warn{background:var(--card);color:var(--rojo);border:1px solid var(--rojo)}
+.btn.exit{background:var(--naranja);color:#fff;border:0;height:64px;font-size:20px}
 .btn.ghost{background:transparent;border:0;color:var(--mut);font-weight:600;height:46px}
 .btn.sm{height:46px;font-size:16px}
-.inbox{background:var(--verdeclaro);border:1px solid #9ad8b0;border-radius:14px;padding:14px;margin:6px 0 4px}
+.inbox{background:var(--verdeclaro);border:1px solid var(--verdeline);border-radius:14px;padding:14px;margin:6px 0 4px}
 .inbox b{color:var(--verde);font-size:20px}
-.alert{background:#fdecec;border:1px solid var(--rojo);border-radius:14px;padding:12px 14px;margin:8px 0;color:#7f1d1d}
-.ok{background:var(--verdeclaro);border:1px solid #9ad8b0;border-radius:12px;padding:10px 12px;margin-top:10px;color:#14532d;font-size:14px}
+.inbox small,.outbox small{color:var(--mut)}
+.outbox{background:var(--naranjaclaro);border:1px solid var(--naranjaline);border-radius:14px;padding:14px;margin:8px 0 4px}
+.outbox b:first-child{color:var(--naranja);font-size:20px}
+.alert{background:var(--alertbg);border:1px solid var(--rojo);border-radius:14px;padding:12px 14px;margin:8px 0;color:var(--alerttxt)}
+.ok{background:var(--verdeclaro);border:1px solid var(--verdeline);border-radius:12px;padding:10px 12px;margin-top:10px;color:var(--oktxt);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{flex:1 1 40%;height:50px;border-radius:12px;background:var(--bg);border:2px solid var(--line);color:var(--txt);font-weight:700;font-size:16px}
+.chips button.on{border-color:var(--azul2);background:var(--azulclaro);color:var(--acento)}
+table.caja{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+table.caja td,table.caja th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right}
+table.caja td:first-child,table.caja th:first-child{text-align:left}
+table.caja th{color:var(--acento)}
+.stats #cext2{flex-wrap:wrap;row-gap:2px}
+.stats #cext{display:flex;gap:12px;flex-wrap:wrap}
+.stats #cext b{color:#fff}
+.stats #cpue{margin-left:auto;white-space:nowrap}
 label{display:block;color:var(--txt2);font-size:13px;font-weight:600;margin:12px 0 4px}
 .field{width:100%;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--txt);padding:0 14px;font-size:17px;outline:none}
 .field:focus{border-color:var(--azul2)}
@@ -99,7 +128,7 @@ select.field{appearance:auto}
 
 /* pantallas completas */
 .screen{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:24px 22px calc(24px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto}
-.screen h1{font-size:28px;margin:0 0 6px;color:var(--azul)}
+.screen h1{font-size:28px;margin:0 0 6px;color:var(--acento)}
 .screen p{color:var(--mut);margin:0 0 14px}
 .crest{width:110px;height:110px;margin-bottom:14px;object-fit:contain}
 .crest.sm{width:80px;height:80px}
@@ -107,13 +136,13 @@ select.field{appearance:auto}
 .pin{letter-spacing:10px;text-align:center;font-size:28px;height:62px}
 
 /* organizador */
-.admin h3{margin:22px 0 6px;font-size:16px;color:var(--azul)}
+.admin h3{margin:22px 0 6px;font-size:16px;color:var(--acento)}
 .box{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px}
-.linkbox{word-break:break-all;font-size:13px;color:var(--txt2);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
-.prev{font-size:13px;color:var(--txt2);margin-top:10px;max-height:150px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-details summary{color:var(--azul2);font-weight:600;cursor:pointer;margin-top:4px}
+.linkbox{word-break:break-all;font-size:13px;color:var(--txt2);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+.prev{font-size:13px;color:var(--txt2);margin-top:10px;max-height:150px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+details summary{color:var(--acento);font-weight:600;cursor:pointer;margin-top:4px}
 
-.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--txt);color:#fff;padding:12px 18px;border-radius:12px;z-index:40;max-width:90vw;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:12px;z-index:40;max-width:90vw;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 .demo{background:var(--celeste);color:var(--azul);text-align:center;font-size:12px;padding:4px;font-weight:700}
 </style>
 </head>
@@ -156,6 +185,7 @@ const LS = {
   set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   del(k){ try { localStorage.removeItem(k); } catch {} }
 };
+document.documentElement.dataset.theme = LS.get("pm_theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 function hashId(str){ // FNV-1a → id estable: la misma persona nunca se duplica al releer la planilla
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
@@ -190,6 +220,8 @@ const S = {
 /* ------------------------- capa de datos ------------------------- */
 let store;
 const BASE_FIELDS = ["nombre", "dni", "extra", "fuente"]; // lo único que trae la planilla
+const SIN_SALIDA = {salio: false, salioAt: null, salioPor: null, retiradoPor: null};
+const SIN_INGRESO = {entro: false, entroAt: null, entroAtLocal: null, entroPor: null, ...SIN_SALIDA};
 
 function makeDemoStore(){
   const key = () => "pm_demo_" + S.ev;
@@ -209,7 +241,8 @@ function makeDemoStore(){
       if (p.entro) return {already: true, p};
       Object.assign(p, {entro: true, entroAt: Date.now(), entroPor: device}); save(d); return {ok: true};
     },
-    async undo(id){ const d = load(); Object.assign(d.people[id], {entro:false, entroAt:null, entroPor:null}); save(d); },
+    async undo(id){ const d = load(); Object.assign(d.people[id], SIN_INGRESO); save(d); },
+    async update(id, f){ const d = load(); if (d.people[id]) Object.assign(d.people[id], f); save(d); },
     async add(p){ const d = load(); d.people[p.id] = p; save(d); },
     async addMany(list){ const d = load(); list.forEach(p => { d.people[p.id] = {...(d.people[p.id] || {}), ...pick(p), id: p.id}; }); save(d); },
     async remove(id){ const d = load(); delete d.people[id]; save(d); },
@@ -217,7 +250,7 @@ function makeDemoStore(){
       const d = load();
       for (const [id, p] of Object.entries(d.people)){
         if (p.fuente === "puerta") delete d.people[id];
-        else Object.assign(p, {entro: false, entroAt: null, entroAtLocal: null, entroPor: null});
+        else Object.assign(p, SIN_INGRESO);
       }
       save(d);
     }
@@ -272,7 +305,8 @@ async function makeFirebaseStore(){
       F.updateDoc(pRef(id), data).catch(showError); // queda en cola hasta que vuelva la señal
       return {ok: true, queued: true};
     },
-    async undo(id){ F.updateDoc(pRef(id), {entro: false, entroAt: null, entroAtLocal: null, entroPor: null}).catch(showError); },
+    async undo(id){ F.updateDoc(pRef(id), SIN_INGRESO).catch(showError); },
+    async update(id, f){ F.updateDoc(pRef(id), f).catch(showError); },
     async add(p){ const {id, ...rest} = p; F.setDoc(pRef(id), {...rest, entroAt: rest.entro ? F.serverTimestamp() : null}).catch(showError); },
     async addMany(list){ // merge de los datos de la planilla: nunca pisa quién entró
       for (let i = 0; i < list.length; i += 450){
@@ -284,11 +318,11 @@ async function makeFirebaseStore(){
     async remove(id){ F.deleteDoc(pRef(id)).catch(showError); },
     async resetAll(){ // destilda todos los ingresos y borra las ventas en puerta
       const snap = await F.getDocs(col());
-      const ops = snap.docs.filter(d => d.data().fuente === "puerta" || d.data().entro);
+      const ops = snap.docs.filter(d => d.data().fuente === "puerta" || d.data().entro || d.data().salio);
       for (let i = 0; i < ops.length; i += 450){
         const b = F.writeBatch(db);
         ops.slice(i, i + 450).forEach(d => d.data().fuente === "puerta" ? b.delete(d.ref)
-          : b.update(d.ref, {entro: false, entroAt: null, entroAtLocal: null, entroPor: null}));
+          : b.update(d.ref, SIN_INGRESO));
         await b.commit();
       }
       return ops.length;
@@ -465,14 +499,21 @@ function renderDevice(app){
   $("#ok").onclick = go; $("#dev").onkeydown = e => { if (e.key === "Enter") go(); }; $("#dev").focus();
 }
 
+// estado de cada persona: falta → adentro → se fue
+const estado = p => p.salio ? "fue" : p.entro ? "adentro" : "falta";
+
 function filtered(){
   const q = norm(S.q); const toks = q ? q.split(" ") : [];
   let list = [...S.people.values()];
   if (toks.length) list = list.filter(p => { const h = p._s || (p._s = norm(`${p.nombre} ${p.dni || ""} ${p.extra || ""}`)); return toks.every(t => h.includes(t)); });
   // buscando, en "Faltan" también aparecen los que ya entraron (para avisar)
-  if (S.tab === "faltan" && !toks.length) list = list.filter(p => !p.entro);
-  if (S.tab === "adentro") list = list.filter(p => p.entro);
+  if (!toks.length || S.tab !== "faltan"){
+    if (S.tab === "faltan") list = list.filter(p => estado(p) === "falta");
+    if (S.tab === "adentro") list = list.filter(p => estado(p) === "adentro");
+    if (S.tab === "fueron") list = list.filter(p => estado(p) === "fue");
+  }
   if (S.tab === "adentro") list.sort((a, b) => (b.entroAt || 0) - (a.entroAt || 0));
+  else if (S.tab === "fueron") list.sort((a, b) => (b.salioAt || 0) - (a.salioAt || 0));
   else list.sort((a, b) => (a._k || (a._k = norm(a.nombre))).localeCompare(b._k || (b._k = norm(b.nombre))));
   return list;
 }
@@ -485,16 +526,17 @@ function renderMain(app){
         <div class="hrow">
           <img class="hlogo" src="logo.png" alt="">
           <div class="title"><b id="evname"></b><small><span class="dot" id="dot"></span> <span id="devname"></span></small></div>
+          <button class="iconbtn" id="theme" aria-label="Modo claro u oscuro"></button>
           <button class="iconbtn" id="cfg" aria-label="Organizador">⚙️</button>
         </div>
         <div class="stats">
-          <div class="big"><b id="cin">0</b><span id="ctot">de 0 adentro</span></div>
+          <div class="big"><b id="cin">0</b><span id="ctot">adentro ahora</span></div>
           <div class="bar"><i id="cbar"></i></div>
-          <div class="sub"><span id="cfal"></span><span id="cpue"></span></div>
-          <div class="sub"><span id="csync"></span></div>
+          <div class="sub"><span id="cflow"></span></div>
+          <div class="sub" id="cext2"><span id="cext"></span><span id="cpue"></span></div>
         </div>
         <div class="search"><input id="q" placeholder="Buscar por nombre" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="qx" class="hidden" aria-label="Borrar">✕</button></div>
-        <div class="tabs"><button data-t="faltan">Faltan</button><button data-t="adentro">Adentro</button><button data-t="todos">Todos</button></div>
+        <div class="tabs"><button data-t="faltan">Faltan</button><button data-t="adentro">Adentro</button><button data-t="fueron">Se fueron</button><button data-t="todos">Todos</button></div>
       </header>
       <main id="list"></main>
       <button class="fab" id="fab">＋ Venta en puerta</button>
@@ -504,25 +546,32 @@ function renderMain(app){
     $("#qx").onclick = () => { clearSearch(); q.focus(); };
     app.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { S.tab = b.dataset.t; S.limit = 80; drawHeader(); drawList(); });
     $("#cfg").onclick = () => S.admin ? openAdmin() : askPin("PIN de organizador", CONFIG.pinAdmin, () => { S.admin = true; openAdmin(); });
+    $("#theme").onclick = toggleTheme;
     $("#fab").onclick = openDoorSale;
     $("#list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) openPerson(r.dataset.id); else if (e.target.id === "more"){ S.limit += 200; drawList(); } });
   }
-  drawHeader(); drawList();
+  applyTheme(); drawHeader(); drawList();
 }
 function clearSearch(){ const q = $("#q"); if (!q) return; q.value = ""; S.q = ""; $("#qx").classList.add("hidden"); drawList(); }
 
 function drawHeader(){
   if (!$("#main")) return;
-  const all = [...S.people.values()], tot = all.length, inn = all.filter(p => p.entro).length;
+  const all = [...S.people.values()], tot = all.length;
+  const entraron = all.filter(p => p.entro).length, fueron = all.filter(p => p.salio).length, ahora = entraron - fueron;
   const pue = all.filter(p => p.fuente === "puerta");
+  const drive = !S.meta.fuenteUrl ? "" : S.sync.running ? " · Drive: revisando…" : S.sync.err ? " · Drive: ⚠ no se pudo leer" : S.sync.at ? ` · Drive al día ${fmtTime(S.sync.at)}` : " · Drive conectado";
   $("#evname").textContent = S.meta.nombre || CONFIG.evento;
-  $("#devname").textContent = `${S.device} · ${S.online ? (S.pending ? "sincronizando…" : "en línea") : "SIN SEÑAL — se guarda y sube después"}`;
+  $("#devname").textContent = `${S.device} · ${S.online ? (S.pending ? "sincronizando…" : "en línea") : "SIN SEÑAL — se guarda y sube después"}${S.online ? drive : ""}`;
   $("#dot").className = "dot" + (!S.online ? " off" : S.pending ? " sync" : "");
-  $("#cin").textContent = inn; $("#ctot").textContent = `de ${tot} adentro`;
-  $("#cbar").style.width = tot ? (inn / tot * 100) + "%" : "0";
-  $("#cfal").textContent = `Faltan ${tot - inn}`;
-  $("#cpue").textContent = pue.length ? `Puerta: ${pue.length} · ${money(pue.reduce((s, p) => s + (p.monto || 0), 0))}` : "";
-  $("#csync").textContent = !S.meta.fuenteUrl ? "" : S.sync.running ? "Drive: revisando…" : S.sync.err ? "Drive: ⚠ no se pudo leer" : S.sync.at ? `Drive: al día ${fmtTime(S.sync.at)}` : "Drive: conectado";
+  $("#cin").textContent = ahora; $("#ctot").textContent = `adentro ahora · de ${tot}`;
+  $("#cbar").style.width = tot ? (entraron / tot * 100) + "%" : "0";
+  $("#cflow").textContent = `Entraron ${entraron} · Se fueron ${fueron} · Faltan ${tot - entraron}`;
+  $("#cpue").textContent = pue.length ? `Puerta ${pue.length} · ${money(pue.reduce((s, p) => s + (p.monto || 0), 0))}` : "";
+  const ex = extrasLista();
+  $("#cext").innerHTML = ex.length ? ex.map(x => {
+    const g = all.filter(p => p.extra === x);
+    return `<span><b>${esc(x)}</b> ${g.filter(p => p.entro && !p.salio).length} adentro · ${g.filter(p => p.entro).length}/${g.length}</span>`;
+  }).join("") : "";
   document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === S.tab));
   $("#q").placeholder = hasDni() ? "Buscar nombre o DNI" : "Buscar por nombre";
 }
@@ -537,26 +586,45 @@ function drawList(){
   }
   const list = filtered();
   if (!list.length){
-    el.innerHTML = `<div class="empty">${S.q ? `No aparece “${esc(S.q)}”.<br><br>¿Pagó en puerta? Usá <b>＋ Venta en puerta</b>.` : S.tab === "faltan" ? "¡Entraron todos! 🎉" : "Nadie por acá todavía."}</div>`; return;
+    const vacio = {faltan: "¡Entraron todos! 🎉", adentro: "No hay nadie adentro ahora.", fueron: "Todavía no se fue nadie.", todos: "Nadie por acá todavía."};
+    el.innerHTML = `<div class="empty">${S.q ? `No aparece “${esc(S.q)}”.<br><br>¿Pagó en puerta? Usá <b>＋ Venta en puerta</b>.` : vacio[S.tab]}</div>`; return;
   }
-  el.innerHTML = list.slice(0, S.limit).map(p => `
-    <button class="row ${p.entro ? "in" : ""} ${S.flash.has(p.id) ? "flash" : ""}" data-id="${esc(p.id)}">
+  el.innerHTML = list.slice(0, S.limit).map(p => {
+    const st = estado(p);
+    const pill = st === "fue" ? "Se fue " + fmtTime(p.salioAt) : st === "adentro" ? "✔ " + fmtTime(p.entroAt) : "Falta";
+    return `
+    <button class="row ${st === "adentro" ? "in" : st === "fue" ? "out" : ""} ${S.flash.has(p.id) ? "flash" : ""}" data-id="${esc(p.id)}">
       <div class="n"><b>${esc(p.nombre)}${p.fuente === "puerta" ? '<span class="tag">puerta</span>' : ""}</b>
-      <small>${[p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || "")].filter(Boolean).join(" · ") || "&nbsp;"}</small></div>
-      <span class="pill">${p.entro ? "✔ " + fmtTime(p.entroAt) : "Falta"}</span>
-    </button>`).join("") + (list.length > S.limit ? `<button class="more" id="more">Ver ${list.length - S.limit} más</button>` : "");
+      <small>${[p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), st === "fue" && p.retiradoPor ? "con " + esc(p.retiradoPor) : ""].filter(Boolean).join(" · ") || "&nbsp;"}</small></div>
+      <span class="pill">${pill}</span>
+    </button>`;
+  }).join("") + (list.length > S.limit ? `<button class="more" id="more">Ver ${list.length - S.limit} más</button>` : "");
   S.flash.clear();
+}
+
+function confirmTap(btn, label, action){
+  btn.onclick = () => {
+    if (btn.dataset.c){ action(); return; }
+    btn.dataset.c = 1; btn.textContent = label;
+  };
 }
 
 function openPerson(id){
   const p = S.people.get(id); if (!p) return;
-  const info = [p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), p.fuente === "puerta" ? "Venta en puerta" : ""].filter(Boolean).join(" · ");
+  const st = estado(p);
+  const info = [p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), p.fuente === "puerta" ? `Venta en puerta${p.pago ? " · " + esc(p.pago) : ""}` : ""].filter(Boolean).join(" · ");
+  const entroBox = `<div class="inbox"><b>✔ Entró</b> ${fmtTime(p.entroAt)} hs<br><small>marcado por ${esc(p.entroPor || "?")}</small></div>`;
+  let body;
+  if (st === "falta") body = `<button class="btn go" id="go">✔ MARCAR INGRESO</button>`;
+  else if (st === "adentro") body = `${entroBox}
+      <button class="btn exit" id="out">🚪 SE FUE</button>
+      <button class="btn warn sm" id="undo">Deshacer ingreso</button>`;
+  else body = `${entroBox}
+      <div class="outbox"><b>🚪 Se fue</b> ${fmtTime(p.salioAt)} hs${p.retiradoPor ? `<br>Lo retiró: <b>${esc(p.retiradoPor)}</b>` : ""}<br><small>marcado por ${esc(p.salioPor || "?")}</small></div>
+      <button class="btn warn sm" id="undoOut">Deshacer salida (volvió a entrar)</button>`;
   sheet(`
     <h2>${esc(p.nombre)}</h2><div class="meta">${info || "&nbsp;"}</div>
-    ${p.entro
-      ? `<div class="inbox"><b>✔ Ya entró</b><br>${fmtTime(p.entroAt)} hs · marcado por ${esc(p.entroPor || "?")}</div>
-         <button class="btn warn" id="undo">Deshacer ingreso</button>`
-      : `<button class="btn go" id="go">✔ MARCAR INGRESO</button>`}
+    ${body}
     ${S.admin ? `<button class="btn ghost" id="del">Borrar de la lista</button>` : ""}
     <button class="btn ghost" id="x">Cerrar</button>`, el => {
     $("#x", el).onclick = closeSheet;
@@ -574,41 +642,86 @@ function openPerson(id){
         if (S.q) clearSearch();
       } catch (e){ showError(e); go.disabled = false; }
     };
+    const out = $("#out", el);
+    if (out) out.onclick = () => openExit(id);
     const un = $("#undo", el);
-    if (un) un.onclick = () => {
-      if (un.dataset.c){ store.undo(id); closeSheet(); toast("Ingreso deshecho"); }
-      else { un.dataset.c = 1; un.textContent = "Tocá de nuevo para confirmar"; }
-    };
+    if (un) confirmTap(un, "Tocá de nuevo para deshacer el ingreso", () => { store.undo(id); closeSheet(); toast("Ingreso deshecho"); });
+    const uo = $("#undoOut", el);
+    if (uo) confirmTap(uo, "Tocá de nuevo: vuelve a estar adentro", () => { store.update(id, SIN_SALIDA); closeSheet(); toast(`${p.nombre} está adentro de nuevo`); });
     const del = $("#del", el);
-    if (del) del.onclick = () => {
-      if (del.dataset.c){ store.remove(id); closeSheet(); toast("Borrado"); }
-      else { del.dataset.c = 1; del.textContent = "Tocá de nuevo para borrar (si sigue en la planilla, vuelve)"; del.style.color = "var(--rojo)"; }
+    if (del) confirmTap(del, "Tocá de nuevo para borrar (si sigue en la planilla, vuelve)", () => { store.remove(id); closeSheet(); toast("Borrado"); });
+  });
+}
+
+// salida: quién lo vino a buscar
+function openExit(id){
+  const p = S.people.get(id); if (!p) return;
+  let quien = "";
+  sheet(`
+    <h2>🚪 ${esc(p.nombre)} se va</h2><div class="meta">¿Quién lo retira?</div>
+    <div class="chips" id="who">
+      <button data-v="Madre">Madre</button><button data-v="Padre">Padre</button>
+      <button data-v="Otro adulto">Otro adulto</button><button data-v="Se fue solo/a">Solo/a</button>
+    </div>
+    <label>Nombre de quien lo retira (opcional)</label><input class="field" id="wn" autocomplete="off" placeholder="Ej: Laura, tía">
+    <button class="btn exit" id="ok" disabled>Confirmar salida</button>
+    <button class="btn ghost" id="x">Cancelar</button>`, el => {
+    $("#x", el).onclick = () => openPerson(id);
+    el.querySelectorAll("#who button").forEach(b => b.onclick = () => {
+      quien = b.dataset.v; el.querySelectorAll("#who button").forEach(x => x.classList.toggle("on", x === b));
+      $("#ok", el).disabled = false;
+    });
+    $("#ok", el).onclick = () => {
+      const nom = titleCase($("#wn", el).value);
+      const retiradoPor = nom ? `${quien} (${nom})` : quien;
+      store.update(id, {salio: true, salioAt: Date.now(), salioPor: S.device, retiradoPor});
+      buzz(40); closeSheet(); toast(`🚪 ${p.nombre} se fue · ${retiradoPor}`);
+      if (S.q) clearSearch();
     };
   });
 }
 
 function openDoorSale(){
   const precio = S.meta.precioPuerta ?? CONFIG.precioPuerta;
+  let pago = "Efectivo";
   sheet(`
     <h2>Venta en puerta</h2><div class="meta">Se agrega a la lista y queda marcado como adentro.</div>
     <label>Nombre y apellido</label><input class="field" id="n" autocomplete="off" value="${esc(titleCase(S.q))}">
     ${extrasLista().length ? `<label>Invitado por</label><select class="field" id="x2"><option value="">—</option>${extrasLista().map(x => `<option>${esc(x)}</option>`).join("")}</select>` : ""}
     ${hasDni() ? `<label>DNI (opcional)</label><input class="field" id="d" inputmode="numeric" autocomplete="off">` : ""}
     <label>Monto cobrado</label><input class="field" id="m" inputmode="numeric" value="${precio}">
+    <label>Forma de pago</label>
+    <div class="chips" id="pg"><button data-v="Efectivo" class="on">💵 Efectivo</button><button data-v="Transferencia">📲 Transferencia</button></div>
     <label class="chk"><input type="checkbox" id="e" checked> Marcar ingreso ahora</label>
     <button class="btn or" id="ok">Agregar</button>
     <button class="btn ghost" id="x">Cancelar</button>`, el => {
     $("#x", el).onclick = closeSheet; setTimeout(() => $("#n", el).focus(), 50);
+    el.querySelectorAll("#pg button").forEach(b => b.onclick = () => { pago = b.dataset.v; el.querySelectorAll("#pg button").forEach(x => x.classList.toggle("on", x === b)); });
     $("#ok", el).onclick = async () => {
       const nombre = titleCase($("#n", el).value); if (!nombre){ toast("Falta el nombre"); return; }
       const entro = $("#e", el).checked;
       const p = {id: "p_" + randCode(10), nombre, dni: $("#d", el) ? $("#d", el).value.replace(/\D/g, "") : "", extra: $("#x2", el) ? $("#x2", el).value : "",
-        fuente: "puerta", monto: Number($("#m", el).value.replace(/\D/g, "")) || 0, vendidoPor: S.device,
-        entro, entroAt: entro ? Date.now() : null, entroAtLocal: entro ? Date.now() : null, entroPor: entro ? S.device : null};
-      await store.add(p); buzz(40); closeSheet(); toast(`✔ ${nombre} agregado${entro ? " y adentro" : ""}`);
+        fuente: "puerta", monto: Number($("#m", el).value.replace(/\D/g, "")) || 0, pago, vendidoPor: S.device, vendidoAt: Date.now(),
+        entro, entroAt: entro ? Date.now() : null, entroAtLocal: entro ? Date.now() : null, entroPor: entro ? S.device : null, ...SIN_SALIDA};
+      await store.add(p); buzz(40); closeSheet(); toast(`✔ ${nombre} agregado${entro ? " y adentro" : ""} · ${pago}`);
       clearSearch();
     };
   });
+}
+
+// caja de puerta: totales por forma de pago y por quién cobró
+function cajaHtml(){
+  const pue = [...S.people.values()].filter(p => p.fuente === "puerta");
+  if (!pue.length) return `<div class="hint" style="margin-top:0">Todavía no hubo ventas en puerta.</div>`;
+  const sum = arr => arr.reduce((s, p) => s + (p.monto || 0), 0);
+  const by = k => { const m = {}; pue.forEach(p => { const v = p[k] || "Sin dato"; (m[v] = m[v] || []).push(p); }); return m; };
+  const filas = m => Object.entries(m).map(([k, a]) => `<tr><td>${esc(k)}</td><td>${a.length}</td><td>${money(sum(a))}</td></tr>`).join("");
+  return `<table class="caja">
+      <tr><th>Total</th><th>${pue.length}</th><th>${money(sum(pue))}</th></tr>
+      ${filas(by("pago"))}
+    </table>
+    <div class="hint">Por quién cobró:</div>
+    <table class="caja">${filas(by("vendidoPor"))}</table>`;
 }
 
 function askPin(title, expected, ok){
@@ -655,6 +768,9 @@ function openAdmin(){
       <label>Precio en puerta</label><input class="field" id="evp" inputmode="numeric" value="${m.precioPuerta ?? CONFIG.precioPuerta}">
       <button class="btn sm" id="savem">Guardar</button>
     </div>
+
+    <h3>Caja de puerta</h3>
+    <div class="box">${cajaHtml()}</div>
 
     <h3>Al final de la noche</h3>
     <button class="btn sm" id="exp">Descargar planilla de asistencia (CSV)</button>
@@ -771,9 +887,11 @@ async function importFile(file, box){
 }
 
 function exportCsv(){
-  const rows = [["Nombre", "DNI", "Extra", "Origen", "Monto puerta", "Entró", "Hora", "Marcado por"]];
+  const dni = hasDni();
+  const rows = [["Nombre", ...(dni ? ["DNI"] : []), "Invitado por", "Origen", "Monto puerta", "Forma de pago", "Cobró", "Entró", "Hora ingreso", "Marcó ingreso", "Se fue", "Hora salida", "Lo retiró", "Marcó salida"]];
   [...S.people.values()].sort((a, b) => norm(a.nombre).localeCompare(norm(b.nombre))).forEach(p =>
-    rows.push([p.nombre, p.dni || "", p.extra || "", p.fuente === "puerta" ? "Puerta" : "Planilla", p.monto || "", p.entro ? "Sí" : "No", fmtTime(p.entroAt), p.entroPor || ""]));
+    rows.push([p.nombre, ...(dni ? [p.dni || ""] : []), p.extra || "", p.fuente === "puerta" ? "Puerta" : "Planilla", p.monto || "", p.pago || "", p.vendidoPor || "",
+      p.entro ? "Sí" : "No", fmtTime(p.entroAt), p.entroPor || "", p.salio ? "Sí" : "No", fmtTime(p.salioAt), p.retiradoPor || "", p.salioPor || ""]));
   const csv = "﻿" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\r\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([csv], {type: "text/csv;charset=utf-8"}));
@@ -809,6 +927,27 @@ function startAutoSync(){
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && S.meta.fuenteUrl && (!S.sync.at || Date.now() - S.sync.at > 60000)) syncDrive().catch(() => {});
 });
+// pantalla siempre encendida mientras la app está abierta
+let wakeLock = null;
+async function keepAwake(){
+  try { if ("wakeLock" in navigator && document.visibilityState === "visible" && !wakeLock){
+    wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; });
+  } } catch {}
+}
+document.addEventListener("visibilitychange", keepAwake);
+document.addEventListener("click", keepAwake, {once: true});
+keepAwake();
+
+// modo oscuro: por defecto sigue al celular; el botón lo fija en este dispositivo
+function applyTheme(){
+  const t = LS.get("pm_theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t;
+  document.querySelector('meta[name="theme-color"]').content = t === "dark" ? "#0a1a45" : "#003087";
+  const b = $("#theme"); if (b) b.textContent = t === "dark" ? "☀️" : "🌙";
+}
+function toggleTheme(){ LS.set("pm_theme", document.documentElement.dataset.theme === "dark" ? "light" : "dark"); applyTheme(); }
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme); } catch {}
+
 window.addEventListener("online", () => { S.online = true; drawHeader(); });
 window.addEventListener("offline", () => { S.online = false; drawHeader(); });
 new MutationObserver(() => { if (!$("#layer").children.length) drawList(); }).observe($("#layer"), {childList: true});
