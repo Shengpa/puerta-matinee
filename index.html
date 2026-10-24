@@ -212,7 +212,15 @@ function makeDemoStore(){
     async undo(id){ const d = load(); Object.assign(d.people[id], {entro:false, entroAt:null, entroPor:null}); save(d); },
     async add(p){ const d = load(); d.people[p.id] = p; save(d); },
     async addMany(list){ const d = load(); list.forEach(p => { d.people[p.id] = {...(d.people[p.id] || {}), ...pick(p), id: p.id}; }); save(d); },
-    async remove(id){ const d = load(); delete d.people[id]; save(d); }
+    async remove(id){ const d = load(); delete d.people[id]; save(d); },
+    async resetAll(){
+      const d = load();
+      for (const [id, p] of Object.entries(d.people)){
+        if (p.fuente === "puerta") delete d.people[id];
+        else Object.assign(p, {entro: false, entroAt: null, entroAtLocal: null, entroPor: null});
+      }
+      save(d);
+    }
   };
 }
 const pick = p => Object.fromEntries(BASE_FIELDS.map(k => [k, p[k] ?? ""]));
@@ -273,7 +281,18 @@ async function makeFirebaseStore(){
         await b.commit();
       }
     },
-    async remove(id){ F.deleteDoc(pRef(id)).catch(showError); }
+    async remove(id){ F.deleteDoc(pRef(id)).catch(showError); },
+    async resetAll(){ // destilda todos los ingresos y borra las ventas en puerta
+      const snap = await F.getDocs(col());
+      const ops = snap.docs.filter(d => d.data().fuente === "puerta" || d.data().entro);
+      for (let i = 0; i < ops.length; i += 450){
+        const b = F.writeBatch(db);
+        ops.slice(i, i + 450).forEach(d => d.data().fuente === "puerta" ? b.delete(d.ref)
+          : b.update(d.ref, {entro: false, entroAt: null, entroAtLocal: null, entroPor: null}));
+        await b.commit();
+      }
+      return ops.length;
+    }
   };
 }
 
@@ -640,6 +659,12 @@ function openAdmin(){
     <h3>Al final de la noche</h3>
     <button class="btn sm" id="exp">Descargar planilla de asistencia (CSV)</button>
 
+    <h3>Reiniciar noche</h3>
+    <div class="box">
+      <div class="hint" style="margin-top:0">Deja a todos como <b>"Falta"</b> y borra las ventas en puerta. Usalo después de las pruebas, antes de abrir la puerta. La lista del Excel no se toca.</div>
+      <button class="btn warn sm" id="reset">Reiniciar noche</button>
+    </div>
+
     <details style="margin-top:18px"><summary>¿Sin Drive? Importar un archivo Excel/CSV</summary>
       <div class="box" style="margin-top:8px">
         <input type="file" id="file" accept=".csv,.xlsx,.xls,.ods,text/csv" class="field" style="padding:10px;height:auto">
@@ -664,6 +689,14 @@ function openAdmin(){
       toast("Guardado");
     };
     $("#exp", el).onclick = exportCsv;
+    const rs = $("#reset", el);
+    rs.onclick = async () => {
+      const inn = [...S.people.values()].filter(p => p.entro).length, pue = [...S.people.values()].filter(p => p.fuente === "puerta").length;
+      if (!rs.dataset.c){ rs.dataset.c = 1; rs.textContent = `Confirmar: destildar ${inn} y borrar ${pue} de puerta`; rs.style.background = "var(--rojo)"; rs.style.color = "#fff"; return; }
+      rs.disabled = true; rs.textContent = "Reiniciando…";
+      try { await store.resetAll(); toast("✔ Noche reiniciada: todos en \"Falta\""); closeSheet(); }
+      catch (e){ showError(e); rs.disabled = false; rs.textContent = "Reiniciar noche"; }
+    };
     $("#dev", el).onclick = () => { LS.del("pm_device"); S.device = null; closeSheet(); render(); };
   });
 }
