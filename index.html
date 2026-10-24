@@ -474,7 +474,7 @@ function renderMain(app){
           <div class="sub"><span id="cfal"></span><span id="cpue"></span></div>
           <div class="sub"><span id="csync"></span></div>
         </div>
-        <div class="search"><input id="q" placeholder="Buscar nombre o DNI" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="qx" class="hidden" aria-label="Borrar">✕</button></div>
+        <div class="search"><input id="q" placeholder="Buscar por nombre" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="qx" class="hidden" aria-label="Borrar">✕</button></div>
         <div class="tabs"><button data-t="faltan">Faltan</button><button data-t="adentro">Adentro</button><button data-t="todos">Todos</button></div>
       </header>
       <main id="list"></main>
@@ -505,7 +505,11 @@ function drawHeader(){
   $("#cpue").textContent = pue.length ? `Puerta: ${pue.length} · ${money(pue.reduce((s, p) => s + (p.monto || 0), 0))}` : "";
   $("#csync").textContent = !S.meta.fuenteUrl ? "" : S.sync.running ? "Drive: revisando…" : S.sync.err ? "Drive: ⚠ no se pudo leer" : S.sync.at ? `Drive: al día ${fmtTime(S.sync.at)}` : "Drive: conectado";
   document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === S.tab));
+  $("#q").placeholder = hasDni() ? "Buscar nombre o DNI" : "Buscar por nombre";
 }
+// la lista del Excel no trae DNI: solo se muestra/pide si la planilla lo tiene
+function hasDni(){ for (const p of S.people.values()) if (p.dni && p.fuente !== "puerta") return true; return false; }
+function extrasLista(){ return [...new Set([...S.people.values()].map(p => p.extra).filter(Boolean))].sort(); }
 
 function drawList(){
   const el = $("#list"); if (!el) return;
@@ -569,7 +573,8 @@ function openDoorSale(){
   sheet(`
     <h2>Venta en puerta</h2><div class="meta">Se agrega a la lista y queda marcado como adentro.</div>
     <label>Nombre y apellido</label><input class="field" id="n" autocomplete="off" value="${esc(titleCase(S.q))}">
-    <label>DNI (opcional)</label><input class="field" id="d" inputmode="numeric" autocomplete="off">
+    ${extrasLista().length ? `<label>Invitado por</label><select class="field" id="x2"><option value="">—</option>${extrasLista().map(x => `<option>${esc(x)}</option>`).join("")}</select>` : ""}
+    ${hasDni() ? `<label>DNI (opcional)</label><input class="field" id="d" inputmode="numeric" autocomplete="off">` : ""}
     <label>Monto cobrado</label><input class="field" id="m" inputmode="numeric" value="${precio}">
     <label class="chk"><input type="checkbox" id="e" checked> Marcar ingreso ahora</label>
     <button class="btn or" id="ok">Agregar</button>
@@ -578,7 +583,7 @@ function openDoorSale(){
     $("#ok", el).onclick = async () => {
       const nombre = titleCase($("#n", el).value); if (!nombre){ toast("Falta el nombre"); return; }
       const entro = $("#e", el).checked;
-      const p = {id: "p_" + randCode(10), nombre, dni: $("#d", el).value.replace(/\D/g, ""), extra: "",
+      const p = {id: "p_" + randCode(10), nombre, dni: $("#d", el) ? $("#d", el).value.replace(/\D/g, "") : "", extra: $("#x2", el) ? $("#x2", el).value : "",
         fuente: "puerta", monto: Number($("#m", el).value.replace(/\D/g, "")) || 0, vendidoPor: S.device,
         entro, entroAt: entro ? Date.now() : null, entroAtLocal: entro ? Date.now() : null, entroPor: entro ? S.device : null};
       await store.add(p); buzz(40); closeSheet(); toast(`✔ ${nombre} agregado${entro ? " y adentro" : ""}`);
@@ -664,8 +669,8 @@ function openAdmin(){
 }
 
 function driveFormHtml(val = ""){
-  return `<div class="hint" style="margin-top:0">Abrí la planilla en Drive → <b>Compartir</b> → Acceso general: <b>Cualquier persona con el enlace</b> (Lector) → <b>Copiar vínculo</b>, y pegalo acá.</div>
-    <input class="field" id="surl" placeholder="https://docs.google.com/spreadsheets/d/…" value="${esc(val)}" style="margin-top:10px" autocomplete="off">
+  return `<div class="hint" style="margin-top:0">Pegá la dirección del <b>lector</b> (script.google.com/macros/…) o el link de una Hoja de cálculo de Google compartida como "Cualquier persona con el enlace".</div>
+    <input class="field" id="surl" placeholder="https://script.google.com/macros/s/…" value="${esc(val)}" style="margin-top:10px" autocomplete="off">
     <button class="btn or sm" id="sread">Leer planilla</button>
     <div id="smap"></div>`;
 }
