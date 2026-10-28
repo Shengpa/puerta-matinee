@@ -21,12 +21,17 @@ function doGet() {
 }
 
 function leerFilas(f) {
+  var blob;
   if (f.getMimeType() === MimeType.GOOGLE_SHEETS) {
-    var ss = SpreadsheetApp.openById(f.getId());
-    var sh = ss.getSheetByName(HOJA) || ss.getSheets()[0];
-    return sh.getDataRange().getDisplayValues();
+    // Hoja de cálculo de Google: se descarga una copia en .xlsx (solo lectura, no se abre para editar)
+    var r = UrlFetchApp.fetch('https://docs.google.com/spreadsheets/d/' + f.getId() + '/export?format=xlsx', {
+      headers: {Authorization: 'Bearer ' + ScriptApp.getOAuthToken()}, muteHttpExceptions: true
+    });
+    if (r.getResponseCode() !== 200) throw new Error('No pude descargar la planilla (' + r.getResponseCode() + ')');
+    blob = r.getBlob();
+  } else {
+    blob = f.getBlob();
   }
-  var blob = f.getBlob();
   blob.setContentType('application/zip');
   var files = {};
   Utilities.unzip(blob).forEach(function (b) { files[b.getName()] = b.getDataAsString('UTF-8'); });
