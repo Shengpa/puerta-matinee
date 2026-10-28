@@ -387,6 +387,14 @@ function guessMap(headers){
   const n = find(GUESS.nombre), a = find(GUESS.apellido), d = find(GUESS.dni), x = find(GUESS.extra);
   return {nombre: headers[n] || "", apellido: headers[a] || "", dni: headers[d] || "", extra: headers[x] || ""};
 }
+// "Santa cruz Bautista" y "Bautista Santa Cruz" son la misma persona
+function claveNombre(nombre, dni){ return norm(nombre).split(" ").sort().join(" ") + "|" + (dni || ""); }
+function esNuevo(p){
+  if (S.people.has(p.id)) return false;
+  const k = claveNombre(p.nombre, p.dni);
+  for (const x of S.people.values()) if (claveNombre(x.nombre, x.dni) === k) return false;
+  return true;
+}
 function rowsToPeople(headers, data, map){
   const ix = k => map[k] ? headers.indexOf(map[k]) : -1;
   const iN = ix("nombre"), iA = ix("apellido"), iD = ix("dni"), iE = ix("extra");
@@ -398,8 +406,9 @@ function rowsToPeople(headers, data, map){
     const dni = iD >= 0 ? String(r[iD]).replace(/\D/g, "") : "";
     const extra = iE >= 0 ? String(r[iE]).trim().slice(0, 60) : "";
     const id = hashId(norm(nombre) + "|" + dni);
-    if (seen.has(id)){ dup++; continue; }
-    seen.set(id, {id, nombre, dni, extra, fuente: "form"});
+    const k = claveNombre(nombre, dni);   // mismo nombre aunque esté en otro orden
+    if (seen.has(k)){ dup++; continue; }
+    seen.set(k, {id, nombre, dni, extra, fuente: "form"});
   }
   return {list: [...seen.values()], dup, skip};
 }
@@ -413,7 +422,7 @@ async function syncDrive({manual = false} = {}){
     const {headers, data} = await fetchSheet(url);
     const {list, missing} = rowsToPeople(headers, data, map);
     if (missing) throw new Error(`La planilla ya no tiene la columna "${missing}". Volvé a elegir columnas en ⚙️.`);
-    const nuevos = list.filter(p => !S.people.has(p.id));
+    const nuevos = list.filter(esNuevo);
     if (nuevos.length) await store.addMany(nuevos);
     S.sync.at = Date.now(); S.sync.err = null;
     if (manual) toast(nuevos.length ? `✔ ${nuevos.length} nuevos desde Drive` : "✔ Lista al día, no hay nuevos");
@@ -856,7 +865,7 @@ function mappingUI(box, headers, data, prevMap, label, onOk){
   const readMap = () => Object.fromEntries([...box.querySelectorAll("select")].map(s => [s.dataset.k, s.value]));
   const preview = () => {
     const {list, dup, skip} = rowsToPeople(headers, data, readMap());
-    const nuevos = list.filter(p => !S.people.has(p.id));
+    const nuevos = list.filter(esNuevo);
     $("#pv", box).innerHTML = list.length
       ? `<b>${nuevos.length} nuevos</b> · ${list.length - nuevos.length} ya estaban${dup ? ` · ${dup} repetidos (se cargan una vez)` : ""}${skip ? ` · ${skip} filas sin nombre` : ""}<br><br>` +
         list.slice(0, 6).map(p => esc(p.nombre) + (p.dni ? " · " + esc(p.dni) : "") + (p.extra ? " · " + esc(p.extra) : "")).join("<br>") + (list.length > 6 ? "<br>…" : "")
