@@ -204,7 +204,7 @@ function titleCase(s){
 const S = {
   ev: null, device: LS.get("pm_device"), people: new Map(), meta: {},
   online: navigator.onLine, pending: false, tab: "faltan", q: "", limit: 80,
-  admin: false, flash: new Set(), ready: false,
+  admin: false, flash: new Set(), ready: false, ocultos: new Set(),
   sync: {at: null, err: null, running: false}
 };
 
@@ -390,7 +390,7 @@ function guessMap(headers){
 // "Santa cruz Bautista" y "Bautista Santa Cruz" son la misma persona
 function claveNombre(nombre, dni){ return norm(nombre).split(" ").sort().join(" ") + "|" + (dni || ""); }
 function esNuevo(p){
-  if (S.people.has(p.id)) return false;
+  if (S.people.has(p.id) || S.ocultos.has(p.id)) return false;   // borrados a mano no vuelven
   const k = claveNombre(p.nombre, p.dni);
   for (const x of S.people.values()) if (claveNombre(x.nombre, x.dni) === k) return false;
   return true;
@@ -658,7 +658,10 @@ function openPerson(id){
     const uo = $("#undoOut", el);
     if (uo) confirmTap(uo, "Tocá de nuevo: vuelve a estar adentro", () => { store.update(id, SIN_SALIDA); closeSheet(); toast(`${p.nombre} está adentro de nuevo`); });
     const del = $("#del", el);
-    if (del) confirmTap(del, "Tocá de nuevo para borrar (si sigue en la planilla, vuelve)", () => { store.remove(id); closeSheet(); toast("Borrado"); });
+    if (del) confirmTap(del, "Tocá de nuevo para borrar", () => { 
+      // los de la planilla se ocultan (si se borraran, la próxima lectura del Excel los volvería a traer)
+      if (p.fuente === "puerta") store.remove(id); else store.update(id, {oculto: true});
+      closeSheet(); toast("Borrado de la lista"); });
   });
 }
 
@@ -920,7 +923,8 @@ async function boot(creating = false){
   store.subscribe(({meta, people, pending, changed}) => {
     const hadUrl = S.meta.fuenteUrl;
     S.meta = meta || {}; S.pending = pending;
-    const prev = S.people; S.people = new Map(people.map(p => [p.id, p]));
+    S.ocultos = new Set(people.filter(p => p.oculto).map(p => p.id));
+    const prev = S.people; S.people = new Map(people.filter(p => !p.oculto).map(p => [p.id, p]));
     if (S.ready) changed.forEach(id => { const a = prev.get(id), b = S.people.get(id); if (b && b.entro && !(a && a.entro)) S.flash.add(id); });
     const first = !S.ready; S.ready = true;
     if (first || !$("#main")) render(); else { drawHeader(); if (!document.querySelector(".sheet")) drawList(); else S.flash.clear(); }
