@@ -82,6 +82,9 @@ main{padding:6px 16px 110px}
 .row.flash{animation:flash 1.2s}
 @keyframes flash{0%{box-shadow:0 0 0 3px var(--celeste)}100%{box-shadow:0 0 0 0 transparent}}
 .tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:6px;background:var(--celeste);color:var(--azul);margin-left:6px;vertical-align:2px}
+.tag.np{background:var(--rojo);color:#fff;font-weight:800}
+.row.np{border-color:var(--rojo)}
+.btn.np{background:var(--rojo);color:#fff;border:0;height:72px;font-size:20px}
 .empty{color:var(--mut);text-align:center;padding:40px 10px}
 .more{display:block;margin:14px auto;background:var(--card);border:1px solid var(--line);padding:10px 18px;border-radius:12px;color:var(--acento)}
 
@@ -222,6 +225,9 @@ let store;
 const BASE_FIELDS = ["nombre", "dni", "extra", "fuente"]; // lo único que trae la planilla
 const SIN_SALIDA = {salio: false, salioAt: null, salioPor: null, retiradoPor: null};
 const SIN_INGRESO = {entro: false, entroAt: null, entroAtLocal: null, entroPor: null, ...SIN_SALIDA};
+// los de la lista que no pagaron y se les cobró en la puerta
+const SIN_COBRO = {noPago: true, cobroPuerta: false, monto: 0, pago: null, vendidoPor: null, vendidoAt: null};
+const esCaja = p => p.fuente === "puerta" || p.cobroPuerta;
 
 function makeDemoStore(){
   const key = () => "pm_demo_" + S.ev;
@@ -250,7 +256,7 @@ function makeDemoStore(){
       const d = load();
       for (const [id, p] of Object.entries(d.people)){
         if (p.fuente === "puerta") delete d.people[id];
-        else Object.assign(p, SIN_INGRESO);
+        else Object.assign(p, SIN_INGRESO, p.cobroPuerta ? SIN_COBRO : {});
       }
       save(d);
     }
@@ -318,11 +324,11 @@ async function makeFirebaseStore(){
     async remove(id){ F.deleteDoc(pRef(id)).catch(showError); },
     async resetAll(){ // destilda todos los ingresos y borra las ventas en puerta
       const snap = await F.getDocs(col());
-      const ops = snap.docs.filter(d => d.data().fuente === "puerta" || d.data().entro || d.data().salio);
+      const ops = snap.docs.filter(d => d.data().fuente === "puerta" || d.data().entro || d.data().salio || d.data().cobroPuerta);
       for (let i = 0; i < ops.length; i += 450){
         const b = F.writeBatch(db);
         ops.slice(i, i + 450).forEach(d => d.data().fuente === "puerta" ? b.delete(d.ref)
-          : b.update(d.ref, SIN_INGRESO));
+          : b.update(d.ref, {...SIN_INGRESO, ...(d.data().cobroPuerta ? SIN_COBRO : {})}));
         await b.commit();
       }
       return ops.length;
@@ -567,7 +573,7 @@ function drawHeader(){
   if (!$("#main")) return;
   const all = [...S.people.values()], tot = all.length;
   const entraron = all.filter(p => p.entro).length, fueron = all.filter(p => p.salio).length, ahora = entraron - fueron;
-  const pue = all.filter(p => p.fuente === "puerta");
+  const pue = all.filter(esCaja);
   const drive = !S.meta.fuenteUrl ? "" : S.sync.running ? " · Drive: revisando…" : S.sync.err ? " · Drive: ⚠ no se pudo leer" : S.sync.at ? ` · Drive al día ${fmtTime(S.sync.at)}` : " · Drive conectado";
   $("#evname").textContent = S.meta.nombre || CONFIG.evento;
   $("#devname").textContent = `${S.device} · ${S.online ? (S.pending ? "sincronizando…" : "en línea") : "SIN SEÑAL — se guarda y sube después"}${S.online ? drive : ""}`;
@@ -602,8 +608,8 @@ function drawList(){
     const st = estado(p);
     const pill = st === "fue" ? "Se fue " + fmtTime(p.salioAt) : st === "adentro" ? "✔ " + fmtTime(p.entroAt) : "Falta";
     return `
-    <button class="row ${st === "adentro" ? "in" : st === "fue" ? "out" : ""} ${S.flash.has(p.id) ? "flash" : ""}" data-id="${esc(p.id)}">
-      <div class="n"><b>${esc(p.nombre)}${p.fuente === "puerta" ? '<span class="tag">puerta</span>' : ""}</b>
+    <button class="row ${st === "adentro" ? "in" : st === "fue" ? "out" : ""} ${p.noPago && st === "falta" ? "np" : ""} ${S.flash.has(p.id) ? "flash" : ""}" data-id="${esc(p.id)}">
+      <div class="n"><b>${esc(p.nombre)}${p.fuente === "puerta" ? '<span class="tag">puerta</span>' : ""}${p.noPago ? '<span class="tag np">⚠ NO PAGÓ</span>' : ""}</b>
       <small>${[p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), st === "fue" && p.retiradoPor ? "con " + esc(p.retiradoPor) : ""].filter(Boolean).join(" · ") || "&nbsp;"}</small></div>
       <span class="pill">${pill}</span>
     </button>`;
@@ -621,24 +627,36 @@ function confirmTap(btn, label, action){
 function openPerson(id){
   const p = S.people.get(id); if (!p) return;
   const st = estado(p);
-  const info = [p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), p.fuente === "puerta" ? `Venta en puerta${p.pago ? " · " + esc(p.pago) : ""}` : ""].filter(Boolean).join(" · ");
+  const info = [p.dni ? "DNI " + esc(p.dni) : "", esc(p.extra || ""), p.fuente === "puerta" ? `Venta en puerta${p.pago ? " · " + esc(p.pago) : ""}` : "",
+    p.cobroPuerta ? `Pagó en puerta ${money(p.monto || 0)}${p.pago ? " · " + esc(p.pago) : ""}` : ""].filter(Boolean).join(" · ");
   const entroBox = `<div class="inbox"><b>✔ Entró</b> ${fmtTime(p.entroAt)} hs<br><small>marcado por ${esc(p.entroPor || "?")}</small></div>`;
+  const npBox = p.noPago ? `<div class="alert"><b>⚠ NO PAGÓ LA ENTRADA</b><br>Cobrar antes de que entre, o consultar con un organizador.</div>` : "";
   let body;
-  if (st === "falta") body = `<button class="btn go" id="go">✔ MARCAR INGRESO</button>`;
-  else if (st === "adentro") body = `${entroBox}
+  if (st === "falta" && p.noPago) body = `${npBox}
+      <button class="btn np" id="cobrar">💵 COBRAR Y MARCAR INGRESO</button>
+      <button class="btn warn sm" id="go">Entra sin cobrar (lo autorizó un organizador)</button>`;
+  else if (st === "falta") body = `<button class="btn go" id="go">✔ MARCAR INGRESO</button>`;
+  else if (st === "adentro") body = `${npBox}${entroBox}
       <button class="btn exit" id="out">🚪 SE FUE</button>
       <button class="btn warn sm" id="undo">Deshacer ingreso</button>`;
-  else body = `${entroBox}
+  else body = `${npBox}${entroBox}
       <div class="outbox"><b>🚪 Se fue</b> ${fmtTime(p.salioAt)} hs${p.retiradoPor ? `<br>Lo retiró: <b>${esc(p.retiradoPor)}</b>` : ""}<br><small>marcado por ${esc(p.salioPor || "?")}</small></div>
       <button class="btn warn sm" id="undoOut">Deshacer salida (volvió a entrar)</button>`;
   sheet(`
     <h2>${esc(p.nombre)}</h2><div class="meta">${info || "&nbsp;"}</div>
     ${body}
+    ${S.admin && p.fuente !== "puerta" && !p.cobroPuerta ? `<button class="btn ghost" id="np">${p.noPago ? "Quitar aviso de \"no pagó\"" : "⚠ Marcar que no pagó"}</button>` : ""}
     ${S.admin ? `<button class="btn ghost" id="del">Borrar de la lista</button>` : ""}
     <button class="btn ghost" id="x">Cerrar</button>`, el => {
     $("#x", el).onclick = closeSheet;
+    const npb = $("#np", el);
+    if (npb) npb.onclick = () => { store.update(id, {noPago: !p.noPago}); closeSheet(); toast(p.noPago ? "Aviso quitado" : `⚠ ${p.nombre}: marcado como que no pagó`); };
+    const cob = $("#cobrar", el);
+    if (cob) cob.onclick = () => openCobro(id);
     const go = $("#go", el);
-    if (go) go.onclick = async () => {
+    if (go && p.noPago && st === "falta"){ confirmTap(go, "Tocá de nuevo: entra SIN pagar", () => doCheckIn()); }
+    else if (go) go.onclick = () => doCheckIn();
+    async function doCheckIn(){
       go.disabled = true;
       try {
         const r = await store.checkIn(id, S.device);
@@ -662,6 +680,37 @@ function openPerson(id){
       // los de la planilla se ocultan (si se borraran, la próxima lectura del Excel los volvería a traer)
       if (p.fuente === "puerta") store.remove(id); else store.update(id, {oculto: true});
       closeSheet(); toast("Borrado de la lista"); });
+  });
+}
+
+// cobrar en la puerta a alguien de la lista que no había pagado
+function openCobro(id){
+  const p = S.people.get(id); if (!p) return;
+  let pago = "Efectivo";
+  sheet(`
+    <h2>💵 Cobrar a ${esc(p.nombre)}</h2><div class="meta">Queda registrado en la caja de puerta y se marca el ingreso.</div>
+    <label>Monto cobrado</label><input class="field" id="m" inputmode="numeric" value="${S.meta.precioPuerta ?? CONFIG.precioPuerta}">
+    <label>Forma de pago</label>
+    <div class="chips" id="pg"><button data-v="Efectivo" class="on">💵 Efectivo</button><button data-v="Transferencia">📲 Transferencia</button></div>
+    <button class="btn go" id="ok">✔ Cobrado · marcar ingreso</button>
+    <button class="btn ghost" id="x">Cancelar</button>`, el => {
+    $("#x", el).onclick = () => openPerson(id);
+    el.querySelectorAll("#pg button").forEach(b => b.onclick = () => { pago = b.dataset.v; el.querySelectorAll("#pg button").forEach(x => x.classList.toggle("on", x === b)); });
+    $("#ok", el).onclick = async () => {
+      const ok = $("#ok", el); ok.disabled = true;
+      const monto = Number($("#m", el).value.replace(/\D/g, "")) || 0;
+      try {
+        const r = await store.checkIn(id, S.device);
+        if (r.already){
+          buzz([120,80,120]);
+          sheet(`<h2>${esc(p.nombre)}</h2><div class="alert"><b>⚠ YA HABÍA ENTRADO</b><br>${fmtTime(r.p.entroAt)} hs · marcado por ${esc(r.p.entroPor || "?")}<br>No se registró el cobro.</div><button class="btn" id="x">Entendido</button>`, e2 => $("#x", e2).onclick = closeSheet);
+          return;
+        }
+        store.update(id, {noPago: false, cobroPuerta: true, monto, pago, vendidoPor: S.device, vendidoAt: Date.now()});
+        buzz(40); closeSheet(); toast(`✔ ${p.nombre} pagó ${money(monto)} · adentro`);
+        if (S.q) clearSearch();
+      } catch (e){ showError(e); ok.disabled = false; }
+    };
   });
 }
 
@@ -723,7 +772,7 @@ function openDoorSale(){
 
 // caja de puerta: totales por forma de pago y por quién cobró
 function cajaHtml(){
-  const pue = [...S.people.values()].filter(p => p.fuente === "puerta");
+  const pue = [...S.people.values()].filter(esCaja);
   if (!pue.length) return `<div class="hint" style="margin-top:0">Todavía no hubo ventas en puerta.</div>`;
   const sum = arr => arr.reduce((s, p) => s + (p.monto || 0), 0);
   const by = k => { const m = {}; pue.forEach(p => { const v = p[k] || "Sin dato"; (m[v] = m[v] || []).push(p); }); return m; };
@@ -902,7 +951,7 @@ function exportCsv(){
   const dni = hasDni();
   const rows = [["Nombre", ...(dni ? ["DNI"] : []), "Invitado por", "Origen", "Monto puerta", "Forma de pago", "Cobró", "Entró", "Hora ingreso", "Marcó ingreso", "Se fue", "Hora salida", "Lo retiró", "Marcó salida"]];
   [...S.people.values()].sort((a, b) => norm(a.nombre).localeCompare(norm(b.nombre))).forEach(p =>
-    rows.push([p.nombre, ...(dni ? [p.dni || ""] : []), p.extra || "", p.fuente === "puerta" ? "Puerta" : "Planilla", p.monto || "", p.pago || "", p.vendidoPor || "",
+    rows.push([p.nombre, ...(dni ? [p.dni || ""] : []), p.extra || "", p.fuente === "puerta" ? "Puerta" : p.cobroPuerta ? "Planilla (pagó en puerta)" : p.noPago ? "Planilla (NO PAGÓ)" : "Planilla", p.monto || "", p.pago || "", p.vendidoPor || "",
       p.entro ? "Sí" : "No", fmtTime(p.entroAt), p.entroPor || "", p.salio ? "Sí" : "No", fmtTime(p.salioAt), p.retiradoPor || "", p.salioPor || ""]));
   const csv = "﻿" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\r\n");
   const a = document.createElement("a");
