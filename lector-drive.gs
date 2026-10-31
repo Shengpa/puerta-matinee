@@ -10,12 +10,14 @@ var HOJA = 'entradas';
 
 function doGet() {
   var f = DriveApp.getFileById(FILE_ID);
-  var key = 'v1_' + f.getLastUpdated().getTime();
+  // Las respuestas del formulario NO cambian la fecha de modificación del archivo,
+  // así que se guarda la lectura solo 1 minuto (si no, los nuevos tardan horas en aparecer).
+  var key = 'v2_' + Math.floor(Date.now() / 60000);
   var cache = CacheService.getScriptCache();
   var csv = cache.get(key);
   if (!csv) {
     csv = armarCsv(leerFilas(f));
-    try { cache.put(key, csv, 21600); } catch (e) {}
+    try { cache.put(key, csv, 90); } catch (e) {}
   }
   return ContentService.createTextOutput(csv).setMimeType(ContentService.MimeType.CSV);
 }
