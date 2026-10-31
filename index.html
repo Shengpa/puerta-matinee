@@ -111,6 +111,10 @@ main{padding:6px 16px 110px}
 .alert{background:var(--alertbg);border:1px solid var(--rojo);border-radius:14px;padding:12px 14px;margin:8px 0;color:var(--alerttxt)}
 .ok{background:var(--verdeclaro);border:1px solid var(--verdeline);border-radius:12px;padding:10px 12px;margin-top:10px;color:var(--oktxt);font-size:14px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
+.aliasbox{display:flex;align-items:center;gap:10px;background:var(--card);border:2px dashed var(--celeste);border-radius:14px;padding:10px 12px;margin-top:10px}
+.aliasbox div{flex:1;min-width:0}.aliasbox small{display:block;color:var(--mut);font-size:12px}
+.aliasbox b{font-size:22px;letter-spacing:.5px;color:var(--acento)}
+.aliasbox button{flex:none;width:auto;height:44px;padding:0 14px;margin:0}
 .chips button{flex:1 1 40%;height:50px;border-radius:12px;background:var(--bg);border:2px solid var(--line);color:var(--txt);font-weight:700;font-size:16px}
 .chips button.on{border-color:var(--azul2);background:var(--azulclaro);color:var(--acento)}
 table.caja{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
@@ -171,6 +175,8 @@ const FIREBASE_CONFIG = {
 const CONFIG = {
   evento: "Fiesta Matinée Liceo Naval",
   precioPuerta: 20000,
+  alias: "LICEO2012",   // para cobrar por transferencia en la puerta
+  titular: "Clara Salgado",
   pinPuerta: "1234",   // lo carga cada persona de la puerta una sola vez
   pinAdmin: "5678",    // para conectar la planilla y crear el link
   syncMinutos: 2       // cada cuánto se revisa la planilla de Drive
@@ -228,6 +234,16 @@ const SIN_INGRESO = {entro: false, entroAt: null, entroAtLocal: null, entroPor: 
 // los de la lista que no pagaron y se les cobró en la puerta
 const SIN_COBRO = {noPago: true, cobroPuerta: false, monto: 0, pago: null, vendidoPor: null, vendidoAt: null};
 const esCaja = p => p.fuente === "puerta" || p.cobroPuerta;
+// alias para transferencias en la puerta
+const aliasPago = () => ({alias: (S.meta.alias ?? CONFIG.alias) || "", titular: (S.meta.titular ?? CONFIG.titular) || ""});
+function aliasBox(){
+  const {alias, titular} = aliasPago(); if (!alias) return "";
+  return `<div class="aliasbox"><div><small>Transferir al alias</small><b>${esc(alias)}</b>${titular ? `<small>a nombre de ${esc(titular)}</small>` : ""}</div><button class="btn sm" id="cpal">📋 Copiar</button></div>`;
+}
+function wireAlias(el){
+  const b = $("#cpal", el); if (!b) return;
+  b.onclick = async () => { try { await navigator.clipboard.writeText(aliasPago().alias); toast("Alias copiado"); } catch { toast("Alias: " + aliasPago().alias); } };
+}
 
 function makeDemoStore(){
   const key = () => "pm_demo_" + S.ev;
@@ -692,9 +708,10 @@ function openCobro(id){
     <label>Monto cobrado</label><input class="field" id="m" inputmode="numeric" value="${S.meta.precioPuerta ?? CONFIG.precioPuerta}">
     <label>Forma de pago</label>
     <div class="chips" id="pg"><button data-v="Efectivo" class="on">💵 Efectivo</button><button data-v="Transferencia">📲 Transferencia</button></div>
+    ${aliasBox()}
     <button class="btn go" id="ok">✔ Cobrado · marcar ingreso</button>
     <button class="btn ghost" id="x">Cancelar</button>`, el => {
-    $("#x", el).onclick = () => openPerson(id);
+    $("#x", el).onclick = () => openPerson(id); wireAlias(el);
     el.querySelectorAll("#pg button").forEach(b => b.onclick = () => { pago = b.dataset.v; el.querySelectorAll("#pg button").forEach(x => x.classList.toggle("on", x === b)); });
     $("#ok", el).onclick = async () => {
       const ok = $("#ok", el); ok.disabled = true;
@@ -753,10 +770,11 @@ function openDoorSale(){
     <label>Monto cobrado</label><input class="field" id="m" inputmode="numeric" value="${precio}">
     <label>Forma de pago</label>
     <div class="chips" id="pg"><button data-v="Efectivo" class="on">💵 Efectivo</button><button data-v="Transferencia">📲 Transferencia</button></div>
+    ${aliasBox()}
     <label class="chk"><input type="checkbox" id="e" checked> Marcar ingreso ahora</label>
     <button class="btn or" id="ok">Agregar</button>
     <button class="btn ghost" id="x">Cancelar</button>`, el => {
-    $("#x", el).onclick = closeSheet; setTimeout(() => $("#n", el).focus(), 50);
+    $("#x", el).onclick = closeSheet; setTimeout(() => $("#n", el).focus(), 50); wireAlias(el);
     el.querySelectorAll("#pg button").forEach(b => b.onclick = () => { pago = b.dataset.v; el.querySelectorAll("#pg button").forEach(x => x.classList.toggle("on", x === b)); });
     $("#ok", el).onclick = async () => {
       const nombre = titleCase($("#n", el).value); if (!nombre){ toast("Falta el nombre"); return; }
@@ -827,6 +845,8 @@ function openAdmin(){
     <div class="box">
       <label style="margin-top:0">Nombre</label><input class="field" id="evn" value="${esc(m.nombre || CONFIG.evento)}">
       <label>Precio en puerta</label><input class="field" id="evp" inputmode="numeric" value="${m.precioPuerta ?? CONFIG.precioPuerta}">
+      <label>Alias para transferencias en puerta</label><input class="field" id="eva" autocomplete="off" value="${esc(aliasPago().alias)}">
+      <label>A nombre de</label><input class="field" id="evt" autocomplete="off" value="${esc(aliasPago().titular)}">
       <button class="btn sm" id="savem">Guardar</button>
     </div>
 
@@ -862,7 +882,8 @@ function openAdmin(){
       try { await navigator.clipboard.writeText(shareLink()); toast("Link copiado"); } catch { toast("Copialo a mano del recuadro"); }
     };
     $("#savem", el).onclick = async () => {
-      await store.saveMeta({nombre: $("#evn", el).value.trim() || CONFIG.evento, precioPuerta: Number($("#evp", el).value.replace(/\D/g, "")) || 0});
+      await store.saveMeta({nombre: $("#evn", el).value.trim() || CONFIG.evento, precioPuerta: Number($("#evp", el).value.replace(/\D/g, "")) || 0,
+        alias: $("#eva", el).value.trim(), titular: $("#evt", el).value.trim()});
       toast("Guardado");
     };
     $("#exp", el).onclick = exportCsv;
